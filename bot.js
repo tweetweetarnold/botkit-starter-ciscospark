@@ -13,14 +13,21 @@ var controller = Botkit.sparkbot({
     secret: process.env.secret
 });
 
+var lang_to_translate = "id";
 
 var bot = controller.spawn({
 });
+
 
 controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
     controller.createWebhookEndpoints(webserver, bot, function () {
         console.log("SPARK: Webhooks set up!");
     });
+});
+
+
+controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
+    bot.reply(message, 'I can do the following:\n - bam\n - hello \n\n - To translate: "-t I love my house"\n - To change language: "-lang zh" ');
 });
 
 controller.hears(['hello', 'hey', 'hi', 'aloha'], 'direct_message,direct_mention', function (bot, message) {
@@ -45,7 +52,10 @@ controller.hears('bam', 'direct_message,direct_mention', function (bot, message)
     var message_options = [
         "Did I just hear a bam? BAM!!!!",
         "Woah! You like bam? Me too!",
-        "You BAM! I BAM! WE BAM!"
+        "You BAM! I BAM! WE BAM!",
+        'BAAAAAAAAAAAAAAAMMMMMMMMMMMMMMMMMMM!',
+        'BAM BAM BAM',
+        'Boom'
     ]
     var random_index = Math.floor(Math.random() * message_options.length)
     var chosen_message = message_options[random_index]
@@ -69,10 +79,27 @@ controller.hears('is Sing cool?', 'direct_message,direct_mention', function (bot
     bot.reply(message, "no");
 });
 
-controller.hears('translate', 'direct_message,direct_mention', function (bot, message) {
+controller.hears('-lang *', 'direct_message,direct_mention', function (bot, message) {
+    lang_to_translate = message.text.substr(message.text.indexOf(" ") + 1)
+    bot.reply(message, 'Language is changed!');
+});
+
+controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
 
     console.log("running.......................");
-    https.get('https://translate.yandex.net/api/v1.5/tr.json/translate?key=trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e&text=hello my friend&lang=zh', (resp) => {
+    console.log("message: " + message.text);
+    // console.log("query: " + message.text.substr(10));
+
+    const baseUrl = 'https://translate.yandex.net/api/v1.5/tr.json/translate?';
+    const key = 'trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e';
+    var lang = lang_to_translate;
+    var query = message.text.substr(message.text.indexOf(" ") + 1);
+
+    var req = baseUrl + "key=" + key + "&lang=" + lang + "&text=" + query;
+
+    bot.reply(message, "translating \"" + query + "\"...");
+
+    https.get(req, (resp) => {
         let data = '';
 
         // A chunk of data has been received.
@@ -94,42 +121,3 @@ controller.hears('translate', 'direct_message,direct_mention', function (bot, me
 
 });
 
-
-controller.hears('baba', 'direct_message,direct_mention', function (bot, message) {
-
-    console.log("running2.......................");
-
-    const options = {
-        hostname: 'https://translate.yandex.net',
-        path: '/api/v1.5/tr.json/translate?key=trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e&text=hello&lang=zh',
-        method: 'GET'
-    };
-
-    const req = https.request(options, (res) => {
-        console.log('statusCode:', res.statusCode);
-        console.log('headers:', res.headers);
-
-        let data = '';
-
-        // A chunk of data has been received.
-        resp.on('data', (chunk) => {
-            data += chunk;
-        });
-
-        // The whole response has been received. Print out the result.
-        resp.on('end', () => {
-            var toJson = JSON.parse(data);
-            console.log("data: " + toJson.text);
-            // console.log(JSON.parse(data).explanation);
-            bot.reply(message, JSON.stringify(toJson.text[0]));
-        });
-    });
-
-    req.on('error', (e) => {
-        console.error(e);
-    });
-    req.end();
-
-
-
-});
