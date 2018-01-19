@@ -32,6 +32,77 @@ controller.hears('help', 'direct_message,direct_mention', function (bot, message
     bot.reply(message, 'Hello, I am Bambot! I do things like BAM!\n\nCurrently there are a few things I can do:\n- Hello\n- Bam\n- Help\n- To change translation language “-lang zh”\n- To translate “-t ducks"');
 });
 
+controller.on('direct_mention', function (bot, message) {
+    bot.reply(message, 'You mentioned me and said, "' + message.text + '"');
+});
+
+controller.on('direct_message', function (bot, message) {
+    bot.reply(message, 'I got your private message. You said, "' + message.text + '"');
+});
+
+controller.on('user_space_join', function (bot, message) {
+    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>!');
+});
+
+controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot, message) {
+    bot.reply(message, "no");
+});
+
+controller.hears('-lang *', 'direct_message,direct_mention', function (bot, message) {
+    lang_to_translate = message.text.substr(message.text.indexOf(" ") + 1)
+    bot.reply(message, 'Language is changed!');
+});
+
+controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
+
+    // console.log(message.data.personEmail);
+    if (message.data.personEmail == 'thomngo@cisco.com') {
+        bot.reply(message, '<@personEmail:thomngo@cisco.com>! Please dont abuse me ok! I am fragile.');
+        // return;
+    }
+
+    console.log("translating.......................");
+    console.log("message: " + message.text);
+    // console.log("query: " + message.text.substr(10));
+
+    const baseUrl = 'https://translate.yandex.net/api/v1.5/tr.json/translate?';
+    const key = 'trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e';
+    var lang = lang_to_translate;
+    var query = message.text.substr(message.text.indexOf(" ") + 1);
+
+    var req = baseUrl + "key=" + key + "&lang=" + lang + "&text=" + query;
+
+    bot.reply(message, "translating \"" + query + "\"...");
+
+    https.get(req, (resp) => {
+        let data = '';
+
+        // A chunk of data has been received.
+        resp.on('data', (chunk) => {
+            data += chunk;
+        });
+
+        // The whole response has been received. Print out the result.
+        resp.on('end', () => {
+            var toJson = JSON.parse(data);
+
+            if (toJson.code == 200) {
+                console.log("data: " + toJson.text);
+                // console.log(JSON.parse(data).explanation);
+                bot.reply(message, JSON.stringify(toJson.text[0]));
+            } else {
+                bot.reply(message, 'Something went wrong! Bambot is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
+            }
+
+        });
+
+    }).on("error", (err) => {
+        console.log("Error: " + err.message);
+    });
+
+});
+
+
 controller.hears(['hello', 'hey', 'hi', 'aloha'], 'direct_message,direct_mention', function (bot, message) {
     var message_options = [
         "Hello!",
@@ -63,72 +134,5 @@ controller.hears('bam', 'direct_message,direct_mention', function (bot, message)
     var chosen_message = message_options[random_index]
 
     bot.reply(message, chosen_message)
-});
-
-controller.on('direct_mention', function (bot, message) {
-    bot.reply(message, 'You mentioned me and said, "' + message.text + '"');
-});
-
-controller.on('direct_message', function (bot, message) {
-    bot.reply(message, 'I got your private message. You said, "' + message.text + '"');
-});
-
-controller.on('user_space_join', function (bot, message) {
-    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>!');
-});
-
-controller.hears('is Sing cool?', 'direct_message,direct_mention', function (bot, message) {
-    bot.reply(message, "no");
-});
-
-controller.hears('-lang *', 'direct_message,direct_mention', function (bot, message) {
-    lang_to_translate = message.text.substr(message.text.indexOf(" ") + 1)
-    bot.reply(message, 'Language is changed!');
-});
-
-controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
-
-    console.log("running.......................");
-    console.log("message: " + message.text);
-    // console.log("query: " + message.text.substr(10));
-
-    const baseUrl = 'https://translate.yandex.net/api/v1.5/tr.json/translate?';
-    const key = 'trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e';
-    var lang = lang_to_translate;
-    var query = message.text.substr(message.text.indexOf(" ") + 1);
-
-    var req = baseUrl + "key=" + key + "&lang=" + lang + "&text=" + query;
-
-    bot.reply(message, "translating \"" + query + "\"...");
-
-    https.get(req, (resp) => {
-        let data = '';
-
-        // A chunk of data has been received.
-        resp.on('data', (chunk) => {
-            data += chunk;
-        });
-
-        // The whole response has been received. Print out the result.
-        resp.on('end', () => {
-            var toJson = JSON.parse(data);
-
-            console.log("code: " + toJson.code);
-            console.log("same? : " + toJson.code == 200);
-
-            if (toJson.code == 200) {
-                console.log("data: " + toJson.text);
-                // console.log(JSON.parse(data).explanation);
-                bot.reply(message, JSON.stringify(toJson.text[0]));
-            }else{
-                bot.reply(message, 'Something went wrong! Bambot is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
-            }
-
-        });
-
-    }).on("error", (err) => {
-        console.log("Error: " + err.message);
-    });
-
 });
 
