@@ -84,14 +84,19 @@ controller.hears('-t *', 'direct_message,direct_mention', function (bot, message
 
         // The whole response has been received. Print out the result.
         resp.on('end', () => {
-            var toJson = JSON.parse(data);
+            try {
+                var toJson = JSON.parse(data);
 
-            if (toJson.code == 200) {
-                console.log("data: " + toJson.text);
-                // console.log(JSON.parse(data).explanation);
-                bot.reply(message, JSON.stringify(toJson.text[0]));
-            } else {
-                bot.reply(message, 'Something went wrong! Bambot is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
+                if (toJson.code == 200) {
+                    console.log("data: " + toJson.text);
+                    // console.log(JSON.parse(data).explanation);
+                    bot.reply(message, JSON.stringify(toJson.text[0]));
+                } else {
+                    bot.reply(message, 'Something went wrong! Bambot is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
+                }
+            } catch (err) {
+                console.log("Error: " + err.message);
+                bot.reply(message, 'You must have tried some weird text. I cannot help you! Bambot is unhappy!');
             }
 
         });
