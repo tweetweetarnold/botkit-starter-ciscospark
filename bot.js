@@ -29,7 +29,7 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
 
 
 controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
-    bot.reply(message, 'Hello, I am Bambot! I do things like BAM!\n\nCurrently there are a few things I can do:\n- Hello\n- Bam\n- Help\n- To change translation language “-lang zh”\n- To translate “-t ducks"');
+    bot.reply(message, 'Hi, I am Bambot! I will be your language translation assistant quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- hello\n- bam\n- set translation language (eg. -lang zh)\n- translate (eg. -t i love chicken)\n\nIn a space, please tag me at the start so that I know you are talking to me!');
 });
 
 controller.on('direct_mention', function (bot, message) {
