@@ -96,7 +96,20 @@ controller.hears('-t *', 'direct_message,direct_mention', function (bot, message
                 }
             } catch (err) {
                 console.log("Error: " + err.message);
-                bot.reply(message, 'You must have tried some weird text. I cannot help you! **Bambot** is unhappy!');
+                // bot.reply(message, 'You must have tried some weird text. I cannot help you! **Bambot** is unhappy!');
+
+                var message_options = [
+                    'What nonsense was that? That\'s just rude! ',
+                    'Don\'t get me to do impossible things! Mutual respect goes both ways! ',
+                    'What is that seriously..? ',
+                    'That translation is way above my pay grade. ',
+                    'That\'s too hard! '
+                ]
+                var random_index = Math.floor(Math.random() * message_options.length)
+                var chosen_message = message_options[random_index]
+
+                bot.reply(message, chosen_message + 'Change your text and try again!');
+
             }
 
         });
