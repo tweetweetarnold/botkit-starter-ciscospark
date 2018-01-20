@@ -29,7 +29,7 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
 
 
 controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
-    bot.reply(message, 'Hi, I am **Bambot**! I will be your assistant to translate foreign languages quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- hello\n- bam\n- set translation language (eg. -lang zh)\n- translate (eg. -t i love chicken)\n\nIn a space, please tag me at the start so that I know you are talking to me!');
+    bot.reply(message, 'Hi, ' + help_msg);
 });
 
 controller.on('direct_mention', function (bot, message) {
@@ -41,7 +41,7 @@ controller.on('direct_message', function (bot, message) {
 });
 
 controller.on('user_space_join', function (bot, message) {
-    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>! I am **Bambot**! I will be your assistant to translate foreign languages quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- hello\n- bam\n- set translation language (eg. -lang zh)\n- translate (eg. -t i love chicken)\n\nIn a space, please tag me at the start so that I know you are talking to me!');
+    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>! ' + help_msg);
 });
 
 controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot, message) {
@@ -96,7 +96,6 @@ controller.hears('-t *', 'direct_message,direct_mention', function (bot, message
                 }
             } catch (err) {
                 console.log("Error: " + err.message);
-                // bot.reply(message, 'You must have tried some weird text. I cannot help you! **Bambot** is unhappy!');
 
                 var message_options = [
                     'What nonsense was that? That\'s just rude! ',
@@ -109,7 +108,7 @@ controller.hears('-t *', 'direct_message,direct_mention', function (bot, message
                 var chosen_message = message_options[random_index]
 
                 bot.reply(message, chosen_message + 'Change your text and try again!');
-
+                // bot.reply(message, 'You must have tried some weird text. I cannot help you! **Bambot** is unhappy!');
             }
 
         });
@@ -154,3 +153,4 @@ controller.hears('bam', 'direct_message,direct_mention', function (bot, message)
     bot.reply(message, chosen_message)
 });
 
+var help_msg = 'I am **Bambot**! I will be your assistant to translate foreign languages quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- Greet you back! Try `hello`\n- BAM back! `bam`\n- Show languages I know. `-t show`\n- Set translation language. Eg. `-lang zh`\n- Translate. Eg. `-t i love chicken`\n\nIn a space, please tag me at the start so that I know you are talking to me!';
