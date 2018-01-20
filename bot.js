@@ -29,7 +29,7 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
 
 
 controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
-    bot.reply(message, 'Hi, I am Bambot! I will be your language translation assistant quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- hello\n- bam\n- set translation language (eg. -lang zh)\n- translate (eg. -t i love chicken)\n\nIn a space, please tag me at the start so that I know you are talking to me!');
+    bot.reply(message, 'Hi, I am **Bambot**! I will be your assistant to translate foreign languages quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- hello\n- bam\n- set translation language (eg. -lang zh)\n- translate (eg. -t i love chicken)\n\nIn a space, please tag me at the start so that I know you are talking to me!');
 });
 
 controller.on('direct_mention', function (bot, message) {
@@ -41,7 +41,7 @@ controller.on('direct_message', function (bot, message) {
 });
 
 controller.on('user_space_join', function (bot, message) {
-    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>!');
+    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>! I am **Bambot**! I will be your assistant to translate foreign languages quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- hello\n- bam\n- set translation language (eg. -lang zh)\n- translate (eg. -t i love chicken)\n\nIn a space, please tag me at the start so that I know you are talking to me!');
 });
 
 controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot, message) {
@@ -92,11 +92,11 @@ controller.hears('-t *', 'direct_message,direct_mention', function (bot, message
                     // console.log(JSON.parse(data).explanation);
                     bot.reply(message, JSON.stringify(toJson.text[0]));
                 } else {
-                    bot.reply(message, 'Something went wrong! Bambot is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
+                    bot.reply(message, 'Something went wrong! **Bambot** is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
                 }
             } catch (err) {
                 console.log("Error: " + err.message);
-                bot.reply(message, 'You must have tried some weird text. I cannot help you! Bambot is unhappy!');
+                bot.reply(message, 'You must have tried some weird text. I cannot help you! **Bambot** is unhappy!');
             }
 
         });
