@@ -23,6 +23,11 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
     });
 });
 
+
+//
+// Methods begin here
+//
+
 controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
     bot.reply(message, 'Hi, ' + intro_msg);
 });
@@ -44,16 +49,22 @@ controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot
 });
 
 controller.hears('-lang *', 'direct_message,direct_mention', function (bot, message) {
-    lang_to_translate = message.text.substr(message.text.indexOf(" ") + 1)
-    bot.reply(message, 'Language is changed to **' + lang_list[lang_to_translate] + '**');
+    var to_translate = message.text.substr(message.text.indexOf(" ") + 1);
+
+    if (to_translate === undefined) {
+        bot.reply(message, 'This is not a valid language! Try `-show` to see the list of supported languages!');
+    } else {
+        lang_to_translate = to_translate;
+        bot.reply(message, 'Language is changed to **' + lang_list[lang_to_translate] + '**');
+    }
 });
 
 controller.hears('-show', 'direct_message,direct_mention', function (bot, message) {
     bot.reply(message, lang_list2);
 });
 
-controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
 
+controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
     // console.log(message.data.personEmail);
     if (message.data.personEmail == 'thomngo@cisco.com') {
         bot.reply(message, '<@personEmail:thomngo@cisco.com>! Please dont abuse me ok! I am fragile.');
