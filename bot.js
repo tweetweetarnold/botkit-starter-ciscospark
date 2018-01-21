@@ -12,7 +12,7 @@ var controller = Botkit.sparkbot({
     secret: process.env.secret
 });
 
-var lang_to_translate = "zh";
+// var langCode_toTranslate = "en";
 
 var bot = controller.spawn({
 });
@@ -25,7 +25,7 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
 
 
 //
-// Methods begin here
+// ******** Methods begin here ********
 //
 
 controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
@@ -49,20 +49,25 @@ controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot
 });
 
 controller.hears('-lang *', 'direct_message,direct_mention', function (bot, message) {
-    var to_translate = message.text.substr(message.text.indexOf(" ") + 1);
+    var langCode_toChange = message.text.substr(message.text.indexOf(" ") + 1);
+    var this_roomId = message.data.roomId;
 
-    if (to_translate === undefined) {
+    if (lang_list[langCode_toChange] === undefined) {
         bot.reply(message, 'This is not a valid language! Try `-show` to see the list of supported languages!');
     } else {
-        lang_to_translate = to_translate;
-        bot.reply(message, 'Language is changed to **' + lang_list[lang_to_translate] + '**');
+        // var langCode_toTranslate = langCode_toChange; // update translate 
+        room_lang[this_roomId] = langCode_toChange;
+
+        // console.log("this_roomId: " + this_roomId);
+        // console.log("roomlang: " + JSON.stringify(room_lang));
+
+        bot.reply(message, 'Language is changed to **' + lang_list[langCode_toChange] + '**');
     }
 });
 
 controller.hears('-show', 'direct_message,direct_mention', function (bot, message) {
     bot.reply(message, lang_list2);
 });
-
 
 controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
     // console.log(message.data.personEmail);
@@ -77,8 +82,18 @@ controller.hears('-t *', 'direct_message,direct_mention', function (bot, message
 
     const baseUrl = 'https://translate.yandex.net/api/v1.5/tr.json/translate?';
     const key = 'trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e';
-    var lang = lang_to_translate;
+    var this_roomId = message.data.roomId;
     var query = message.text.substr(message.text.indexOf(" ") + 1);
+    var lang = room_lang[this_roomId];
+
+    if(lang === undefined){
+        bot.reply(message, "Language not set! See the list of supported languages using `-show`");
+        return;
+    }
+
+    // console.log("roomlang: " + JSON.stringify(room_lang));
+    // console.log("roomID: " + message.data.roomId);
+    // console.log("lang: " + lang);
 
     var req = baseUrl + "key=" + key + "&lang=" + lang + "&text=" + query;
 
@@ -118,7 +133,6 @@ controller.hears('-t *', 'direct_message,direct_mention', function (bot, message
                 var chosen_message = message_options[random_index]
 
                 bot.reply(message, chosen_message + 'Change your text and try again!');
-                // bot.reply(message, 'You must have tried some weird text. I cannot help you! **Bambot** is unhappy!');
             }
 
         });
@@ -163,9 +177,7 @@ controller.hears('bam', 'direct_message,direct_mention', function (bot, message)
 });
 
 
-
 var intro_msg = 'I am **Bambot**! I will be your assistant to translate foreign languages quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- Greet you back! Try `hello`\n- BAM back! Try `bam`\n- Show languages I know. Try `-show`\n- Set translation language. Try `-lang zh`\n- Translate. Try `-t i love chicken`\n\nIn a space, please tag me at the start so that I know you are talking to me!\nI have also recently been awarded the ThomsonNgo Seal of Approval! Whee!';
-
 
 var lang_list = {
     "af": "Afrikaans",
@@ -265,3 +277,5 @@ var lang_list = {
 };
 
 var lang_list2 = '-   af   =   Afrikaans  \n-   sq   =   Albanian  \n-   am   =   Amharic  \n-   ar   =   Arabic  \n-   hy   =   Armenian  \n-   az   =   Azerbaijan  \n-   ba   =   Bashkir  \n-   eu   =   Basque  \n-   be   =   Belarusian  \n-   bn   =   Bengali  \n-   bs   =   Bosnian  \n-   bg   =   Bulgarian  \n-   my   =   Burmese  \n-   ca   =   Catalan  \n-   ceb   =   Cebuano  \n-   zh   =   Chinese  \n-   hr   =   oatian  \n-   cs   =   Czech  \n-   da   =   Danish  \n-   nl   =   Dutch  \n-   en   =   English  \n-   eo   =   Esperanto  \n-   et   =   Estonian  \n-   fi   =   Finnish  \n-   fr   =   French  \n-   gl   =   Galician  \n-   ka   =   Georgian  \n-   de   =   German  \n-   el   =   Greek  \n-   gu   =   Gujarati  \n-   ht   =   Haitian (eole)  \n-   he   =   Hebrew  \n-   mrj   =   Hill Mari  \n-   hi   =   Hindi  \n-   hu   =   Hungarian  \n-   is   =   Icelandic  \n-   id   =   Indonesian  \n-   ga   =   Irish  \n-   it   =   Italian  \n-   ja   =   Japanese  \n-   jv   =   Javanese  \n-   kn   =   Kannada  \n-   kk   =   Kazakh  \n-   km   =   Khmer  \n-   ko   =   Korean  \n-   ky   =   Kyrgyz  \n-   lo   =   Laotian  \n-   la   =   Latin  \n-   lv   =   Latvian  \n-   lt   =   Lithuanian  \n-   lb   =   Luxembourgish  \n-   mk   =   Macedonian  \n-   mg   =   Malagasy  \n-   ms   =   Malay  \n-   ml   =   Malayalam  \n-   mt   =   Maltese  \n-   mi   =   Maori  \n-   mr   =   Marathi  \n-   mhr   =   Mari  \n-   mn   =   Mongolian  \n-   ne   =   Nepali  \n-   no   =   Norwegian  \n-   pap   =   Papiamento  \n-   fa   =   Persian  \n-   pl   =   Polish  \n-   pt   =   Portuguese  \n-   pa   =   Punjabi  \n-   ro   =   Romanian  \n-   ru   =   Russian  \n-   gd   =   Scottish  \n-   sr   =   Serbian  \n-   si   =   Sinhala  \n-   sk   =   Slovakian  \n-   sl   =   Slovenian  \n-   es   =   Spanish  \n-   su   =   Sundanese  \n-   sw   =   Swahili  \n-   sv   =   Swedish  \n-   tl   =   Tagalog  \n-   tg   =   Tajik  \n-   ta   =   Tamil  \n-   tt   =   Tatar  \n-   te   =   Telugu  \n-   th   =   Thai  \n-   tr   =   Turkish  \n-   udm   =   Udmurt  \n-   uk   =   Ukrainian  \n-   ur   =   Urdu  \n-   uz   =   Uzbek  \n-   vi   =   Vietnamese  \n-   cy   =   Welsh  \n-   xh   =   Xhosa  \n-   yi   =   Yiddish  \n';
+
+var room_lang = {};
