@@ -24,19 +24,16 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
 
 // var room_lang = {};
 
-// try to get skills
-console.log("getting skills...");
+// retrieving skills
 var normalizedPath = require("path").join(__dirname, "skills");
 require("fs").readdirSync(normalizedPath).forEach(function (file) {
     require("./skills/" + file)(controller);
 });
-console.log("i have skills!");
 
 
 //
-// ******** Methods begin here ********
+// ******** General Methods begin here ********
 //
-
 controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
     bot.reply(message, 'Hi, ' + intro_msg);
 });
