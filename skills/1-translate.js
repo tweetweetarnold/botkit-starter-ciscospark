@@ -15,62 +15,43 @@ module.exports = function (controller) {
     // detect language
     controller.hears('-dt *', 'direct_message,direct_mention', function (bot, message) {
 
-        const feature = 'detect';
-        var text = message.text.substr(message.text.indexOf(" ") + 1);
-        // var lang = room_lang[this_roomId];
-
-        console.log(text);
-        var req = baseUrl + feature + "?key=" + key + "&text=" + text;
-        console.log(req);
+        const postData = querystring.stringify({
+            'msg': 'Hello World!'
+        });
 
         const options = {
             hostname: 'translate.yandex.net',
-            port: 443,
-            path: '/api/v1.5/tr.json/detect?key=trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e&amp;text=ducks',
-            method: 'POST',
+            port: 80,
+            path: '//api/v1.5/tr.json/detect?hint=en,de&key=' + key,
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(postData)
             }
-        }
+        };
 
-        https.request(options, (resp) => {
-            let data = '';
+        console.log('wow');
 
-            // A chunk of data has been received.
-            resp.on('data', (chunk) => {
-                data += chunk;
+        https.request(options, (res) => {
+            console.log("its here");
+            res.setEncoding('utf8');
+
+            res.on('data', (chunk) => {
+                console.log(`BODY: ${chunk}`);
             });
 
-            // The whole response has been received. Print out the result.
-            resp.on('end', () => {
-                try {
-                    var toJson = JSON.parse(data);
-
-                    // console.log("data: " + toJson.lang);
-                    // console.log(lang_list[toJson.lang]);
-                    bot.reply(message, "**" + lang_list[toJson.lang] + "** detected!");
-
-                } catch (err) {
-                    console.log("Error: " + err.message);
-
-                    var message_options = [
-                        'What nonsense was that? That\'s just rude! ',
-                        'Don\'t get me to do impossible things! Mutual respect goes both ways! ',
-                        'What is that seriously..? ',
-                        'That translation is way above my pay grade. ',
-                        'That\'s too hard! '
-                    ]
-                    var random_index = Math.floor(Math.random() * message_options.length)
-                    var chosen_message = message_options[random_index]
-
-                    bot.reply(message, chosen_message + 'Change your text and try again!');
-                }
-
+            res.on('end', () => {
+                console.log('No more data in response.');
             });
+        }).on('error', (e) => {
+            console.error(`problem with request: ${e.message}`);
+            console.log(e);
+        }).end();
 
-        }).on("error", (err) => {
-            console.log("Error: " + err.message);
-        });
+        // write data to request body
+        // req.write(postData);
+        // req.end();
+
 
 
     });
@@ -116,16 +97,21 @@ module.exports = function (controller) {
             return;
         }
 
+        console.log("query : " + query);
+
         // console.log("roomlang: " + JSON.stringify(room_lang));
         // console.log("roomID: " + message.data.roomId);
         // console.log("lang: " + lang);
 
         var req = baseUrl + feature + "?key=" + key + "&lang=" + lang + "&text=" + query;
+        // req = '';
 
         bot.reply(message, "translating " + query + "...");
+        console.log(req);
 
         https.get(req, (resp) => {
             let data = '';
+            resp.setEncoding('utf8');
 
             // A chunk of data has been received.
             resp.on('data', (chunk) => {
@@ -134,6 +120,7 @@ module.exports = function (controller) {
 
             // The whole response has been received. Print out the result.
             resp.on('end', () => {
+                console.log("headers: " + JSON.stringify(resp.headers));
                 try {
                     var toJson = JSON.parse(data);
 
