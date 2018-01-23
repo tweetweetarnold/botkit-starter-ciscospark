@@ -52,45 +52,76 @@ module.exports = function (controller) {
         // req.write(postData);
         // req.end();
 
-
-
     });
 
 
     // set language to translate to. eg. translate to mandarin
     controller.hears('-lang *', 'direct_message,direct_mention', function (bot, message) {
-        var langCode_toChange = message.text.substr(message.text.indexOf(" ") + 1);
-        var this_roomId = message.data.roomId;
 
-        if (lang_list[langCode_toChange] === undefined) {
-            bot.reply(message, 'This is not a valid language! Try `-show` to see the list of supported languages!');
+        var personEmail = message.data.personEmail;
+        var this_roomId = message.data.roomId;
+        var langCode_str = message.text.substr(message.text.indexOf(" ") + 1);
+
+        if (langCode_str.length != 5) {
+            bot.reply(message, 'That is not a valid translation! Please enter in this format `-lang en-fr`. Enter `-show` to see the list of supported languages!');
+            return;
+        }
+
+        var langCode_toChange = langCode_str.substr(langCode_str.indexOf("-") + 1);;
+        var langCode_from = langCode_str.substr(0, 2);
+
+        console.log("from: " + langCode_from);
+        console.log("to : " + langCode_toChange);
+
+        if (lang_list[langCode_toChange] === undefined || lang_list[langCode_from] === undefined) {
+            bot.reply(message, 'That is not a valid translation! Please enter in this format `-lang en-fr`. Enter `-show` to see the list of supported languages!');
         } else {
             // var langCode_toTranslate = langCode_toChange; // update translate 
-            room_lang[this_roomId] = langCode_toChange;
 
-            // console.log("this_roomId: " + this_roomId);
-            // console.log("roomlang: " + JSON.stringify(room_lang));
+            // room_lang[this_roomId] = langCode_str;
+            // room_lang[this_roomId] = { personEmail : langCode_str };
+            console.log(personEmail);
+            console.log(langCode_str);
 
-            bot.reply(message, 'Language is changed to **' + lang_list[langCode_toChange] + '**');
+            if (room_lang[this_roomId] === undefined) {
+                var b = {};
+                b[personEmail] = langCode_str;
+                console.log("this is b");
+                console.log(b);
+
+                room_lang[this_roomId] = b;
+            } else {
+                var b = room_lang[this_roomId];
+                b[personEmail] = langCode_str;
+            }
+
+
+            console.log(room_lang);
+
+
+
+
+            bot.reply(message, 'Ok! **' + lang_list[langCode_from] + '** will be translated to **' + lang_list[langCode_toChange] + '** for <@personEmail:' + personEmail + '>!');
         }
     });
 
 
     // to translate text 
     controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
-        // console.log(message.data.personEmail);
-        // if (message.data.personEmail == 'thomngo@cisco.com') {
-        //     bot.reply(message, '<@personEmail:thomngo@cisco.com>! Please dont abuse me ok! I am fragile.');
-        //     // return;
-        // }
 
         console.log("translating: " + message.text);
         // console.log("query: " + message.text.substr(10));
+        // console.log(JSON.stringify(message));
 
+
+        var personEmail = message.data.personEmail;
         const feature = 'translate';
         var this_roomId = message.data.roomId;
         var query = message.text.substr(message.text.indexOf(" ") + 1);
-        var lang = room_lang[this_roomId];
+
+        var lang = room_lang[this_roomId][personEmail];
+        console.log("this is lang");
+        console.log(lang);
 
         if (lang === undefined) {
             bot.reply(message, "Language not set! See the list of supported languages using `-show`");
@@ -99,12 +130,7 @@ module.exports = function (controller) {
 
         console.log("query : " + query);
 
-        // console.log("roomlang: " + JSON.stringify(room_lang));
-        // console.log("roomID: " + message.data.roomId);
-        // console.log("lang: " + lang);
-
         var req = baseUrl + feature + "?key=" + key + "&lang=" + lang + "&text=" + query;
-        // req = '';
 
         bot.reply(message, "translating " + query + "...");
         console.log(req);
@@ -146,7 +172,6 @@ module.exports = function (controller) {
 
                     bot.reply(message, chosen_message + 'Change your text and try again!');
                 }
-
             });
 
         }).on("error", (err) => {
