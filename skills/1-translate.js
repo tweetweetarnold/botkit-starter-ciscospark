@@ -132,7 +132,7 @@ module.exports = function (controller) {
 
         var req = baseUrl + feature + "?key=" + key + "&lang=" + lang + "&text=" + query;
 
-        bot.reply(message, "translating " + query + "...");
+        // bot.reply(message, "translating " + query + "...");
         // console.log(req);
 
         https.get(req, (resp) => {
@@ -153,7 +153,7 @@ module.exports = function (controller) {
                     if (toJson.code == 200) {
                         console.log("data: " + toJson.text);
                         // console.log(JSON.parse(data).explanation);
-                        bot.reply(message, '>' + toJson.text[0]);
+                        bot.reply(message, 'Translating: ' + query + ' \n>' + toJson.text[0]);
                     } else {
                         bot.reply(message, 'Something went wrong! **Bambot** is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
                     }
