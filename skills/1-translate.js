@@ -120,20 +120,20 @@ module.exports = function (controller) {
         var query = message.text.substr(message.text.indexOf(" ") + 1);
 
         var lang = room_lang[this_roomId][personEmail];
-        console.log("this is lang");
-        console.log(lang);
+        // console.log("this is lang");
+        // console.log(lang);
 
         if (lang === undefined) {
             bot.reply(message, "Language not set! See the list of supported languages using `-show`");
             return;
         }
 
-        console.log("query : " + query);
+        // console.log("query : " + query);
 
         var req = baseUrl + feature + "?key=" + key + "&lang=" + lang + "&text=" + query;
 
         bot.reply(message, "translating " + query + "...");
-        console.log(req);
+        // console.log(req);
 
         https.get(req, (resp) => {
             let data = '';
@@ -146,14 +146,14 @@ module.exports = function (controller) {
 
             // The whole response has been received. Print out the result.
             resp.on('end', () => {
-                console.log("headers: " + JSON.stringify(resp.headers));
+                // console.log("headers: " + JSON.stringify(resp.headers));
                 try {
                     var toJson = JSON.parse(data);
 
                     if (toJson.code == 200) {
                         console.log("data: " + toJson.text);
                         // console.log(JSON.parse(data).explanation);
-                        bot.reply(message, toJson.text[0]);
+                        bot.reply(message, '>' + toJson.text[0]);
                     } else {
                         bot.reply(message, 'Something went wrong! **Bambot** is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
                     }

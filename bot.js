@@ -38,13 +38,13 @@ controller.hears('help', 'direct_message,direct_mention', function (bot, message
     bot.reply(message, 'Hi, ' + intro_msg);
 });
 
-controller.on('direct_mention', function (bot, message) {
-    bot.reply(message, 'You mentioned me and said, "' + message.text + '"');
-});
+// controller.on('direct_mention', function (bot, message) {
+//     bot.reply(message, 'You mentioned me and said, "' + message.text + '"');
+// });
 
-controller.on('direct_message', function (bot, message) {
-    bot.reply(message, 'I got your private message. You said, "' + message.text + '"');
-});
+// controller.on('direct_message', function (bot, message) {
+//     bot.reply(message, 'I got your private message. You said, "' + message.text + '"');
+// });
 
 controller.on('bot_space_join', function (bot, message) {
     bot.reply(message, 'Hi, ' + intro_msg);
