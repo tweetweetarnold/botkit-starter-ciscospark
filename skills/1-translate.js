@@ -95,11 +95,7 @@ module.exports = function (controller) {
                 b[personEmail] = langCode_str;
             }
 
-
             console.log(room_lang);
-
-
-
 
             bot.reply(message, 'Ok! **' + lang_list[langCode_from] + '** will be translated to **' + lang_list[langCode_toChange] + '** for <@personEmail:' + personEmail + '>!');
         }
@@ -109,12 +105,12 @@ module.exports = function (controller) {
     // to translate text 
     controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
 
-        console.log("translating: " + message.text);
+        var personEmail = message.data.personEmail;
+
+        console.log("translating: " + message.text + ' for <@personEmail:' + personEmail + '>');
         // console.log("query: " + message.text.substr(10));
         // console.log(JSON.stringify(message));
 
-
-        var personEmail = message.data.personEmail;
         const feature = 'translate';
         var this_roomId = message.data.roomId;
         var query = message.text.substr(message.text.indexOf(" ") + 1);

@@ -15,8 +15,12 @@ module.exports = function (controller) {
         ]
         var random_index = Math.floor(Math.random() * message_options.length)
         var chosen_message = message_options[random_index]
-    
+
+        var newData = message.data;
+        newData.text = message.text;
+        controller.storage.teams.save({ id: message.data.id, data: newData });
+
         bot.reply(message, chosen_message)
     })
-    
+
 }

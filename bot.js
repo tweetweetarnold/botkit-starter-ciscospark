@@ -1,6 +1,6 @@
 var Botkit = require('botkit');
-
 var env = require('node-env-file');
+var firebaseStorage = require('botkit-storage-firebase')({ firebase_uri: 'https://bambot-36f9f.firebaseio.com/' });
 env(__dirname + '/.env');
 
 var controller = Botkit.sparkbot({
@@ -8,7 +8,8 @@ var controller = Botkit.sparkbot({
     log: true,
     public_address: process.env.public_address,
     ciscospark_access_token: process.env.access_token,
-    secret: process.env.secret
+    secret: process.env.secret,
+    storage: firebaseStorage
 });
 
 // var langCode_toTranslate = "en";
@@ -16,6 +17,22 @@ var controller = Botkit.sparkbot({
 var bot = controller.spawn({
 });
 
+
+// Creating middleware for dialogflow
+// var dialogflowMiddleware = require('botkit-middleware-dialogflow')({
+//     token: process.env.dialogflow,
+// });
+// controller.middleware.receive.use(dialogflowMiddleware.receive); // telling bot to use middleware when receive message
+// bot.startRTM(); 
+
+
+// make bot listen for intent configured in dialogflow
+// controller.hears(['bam'], 'direct_message,direct_mention', dialogflowMiddleware.hears, function(bot, message) { 
+//     bot.reply(message, 'bam from dialogflow!');
+// });
+
+
+// Setting up web server
 controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
     controller.createWebhookEndpoints(webserver, bot, function () {
         console.log("SPARK: Webhooks set up!");
