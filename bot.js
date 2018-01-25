@@ -12,6 +12,15 @@ var controller = Botkit.sparkbot({
     storage: firebaseStorage
 });
 
+var firebaseConfig = {
+    apiKey: "apiKey",
+    authDomain: "projectId.firebaseapp.com",
+    databaseURL: "https://databaseName.firebaseio.com",
+    storageBucket: "bucket.appspot.com"
+  };
+  firebase.initializeApp(config);
+  
+
 // var langCode_toTranslate = "en";
 
 var bot = controller.spawn({
