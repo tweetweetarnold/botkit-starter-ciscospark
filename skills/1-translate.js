@@ -1,6 +1,6 @@
 const https = require('https');
 
-module.exports = function (controller) {
+module.exports = function (controller, writeIntoFirebase, database) {
 
     var room_lang = {};
     const baseUrl = 'https://translate.yandex.net/api/v1.5/tr.json/';
@@ -9,49 +9,12 @@ module.exports = function (controller) {
 
     // show list of translation languages supported
     controller.hears('-show', 'direct_message,direct_mention', function (bot, message) {
+        writeIntoFirebase(message);
         bot.reply(message, lang_list2);
     });
 
     // detect language
     controller.hears('-dt *', 'direct_message,direct_mention', function (bot, message) {
-
-        const postData = querystring.stringify({
-            'msg': 'Hello World!'
-        });
-
-        const options = {
-            hostname: 'translate.yandex.net',
-            port: 80,
-            path: '//api/v1.5/tr.json/detect?hint=en,de&key=' + key,
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Content-Length': Buffer.byteLength(postData)
-            }
-        };
-
-        console.log('wow');
-
-        https.request(options, (res) => {
-            console.log("its here");
-            res.setEncoding('utf8');
-
-            res.on('data', (chunk) => {
-                console.log(`BODY: ${chunk}`);
-            });
-
-            res.on('end', () => {
-                console.log('No more data in response.');
-            });
-        }).on('error', (e) => {
-            console.error(`problem with request: ${e.message}`);
-            console.log(e);
-        }).end();
-
-        // write data to request body
-        // req.write(postData);
-        // req.end();
-
     });
 
 
@@ -76,17 +39,18 @@ module.exports = function (controller) {
         if (lang_list[langCode_toChange] === undefined || lang_list[langCode_from] === undefined) {
             bot.reply(message, 'That is not a valid translation! Please enter in this format `-lang en-fr`. Enter `-show` to see the list of supported languages!');
         } else {
-            // var langCode_toTranslate = langCode_toChange; // update translate 
-
-            // room_lang[this_roomId] = langCode_str;
-            // room_lang[this_roomId] = { personEmail : langCode_str };
             console.log(personEmail);
             console.log(langCode_str);
+
+            database.ref('translate/' + message.data.roomId + '/' + message.data.personId + '/').set({
+                'lang': langCode_str,
+                'personEmail': message.data.personEmail
+            });
+
 
             if (room_lang[this_roomId] === undefined) {
                 var b = {};
                 b[personEmail] = langCode_str;
-                console.log("this is b");
                 console.log(b);
 
                 room_lang[this_roomId] = b;
@@ -104,75 +68,72 @@ module.exports = function (controller) {
 
     // to translate text 
     controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
+        writeIntoFirebase(message);
 
         var personEmail = message.data.personEmail;
 
         console.log("translating: " + message.text + ' for <@personEmail:' + personEmail + '>');
-        // console.log("query: " + message.text.substr(10));
-        // console.log(JSON.stringify(message));
 
         const feature = 'translate';
         var this_roomId = message.data.roomId;
         var query = message.text.substr(message.text.indexOf(" ") + 1);
 
-        var lang = room_lang[this_roomId][personEmail];
-        // console.log("this is lang");
-        // console.log(lang);
+        database.ref('/translate/' + message.data.roomId + '/' + message.data.personId + '/').once('value').then(function (snapshot) {
+            console.log("myval: " + snapshot.val().lang);
 
-        if (lang === undefined) {
-            bot.reply(message, "Language not set! See the list of supported languages using `-show`");
-            return;
-        }
+            var lang = snapshot.val().lang;
 
-        // console.log("query : " + query);
+            if (lang === undefined) {
+                bot.reply(message, "Language not set! See the list of supported languages using `-show`");
+                return;
+            }
 
-        var req = baseUrl + feature + "?key=" + key + "&lang=" + lang + "&text=" + query;
+            var req = baseUrl + feature + "?key=" + key + "&lang=" + lang + "&text=" + query;
 
-        // bot.reply(message, "translating " + query + "...");
-        // console.log(req);
 
-        https.get(req, (resp) => {
-            let data = '';
-            resp.setEncoding('utf8');
+            https.get(req, (resp) => {
+                let data = '';
+                resp.setEncoding('utf8');
 
-            // A chunk of data has been received.
-            resp.on('data', (chunk) => {
-                data += chunk;
-            });
+                // A chunk of data has been received.
+                resp.on('data', (chunk) => {
+                    data += chunk;
+                });
 
-            // The whole response has been received. Print out the result.
-            resp.on('end', () => {
-                // console.log("headers: " + JSON.stringify(resp.headers));
-                try {
-                    var toJson = JSON.parse(data);
+                // The whole response has been received. Print out the result.
+                resp.on('end', () => {
+                    // console.log("headers: " + JSON.stringify(resp.headers));
+                    try {
+                        var toJson = JSON.parse(data);
 
-                    if (toJson.code == 200) {
-                        console.log("data: " + toJson.text);
-                        // console.log(JSON.parse(data).explanation);
-                        bot.reply(message, 'Translating: ' + query + ' \n>' + toJson.text[0]);
-                    } else {
-                        bot.reply(message, 'Something went wrong! **Bambot** is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
+                        if (toJson.code == 200) {
+                            console.log("data: " + toJson.text);
+                            // console.log(JSON.parse(data).explanation);
+                            bot.reply(message, 'Translating: ' + query + ' \n>' + toJson.text[0]);
+                        } else {
+                            bot.reply(message, 'Something went wrong! **Bambot** is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
+                        }
+                    } catch (err) {
+                        console.log("Error: " + err.message);
+
+                        var message_options = [
+                            'What nonsense was that? That\'s just rude! ',
+                            'Don\'t get me to do impossible things! Mutual respect goes both ways! ',
+                            'What is that seriously..? ',
+                            'That translation is way above my pay grade. ',
+                            'That\'s too hard! '
+                        ]
+                        var random_index = Math.floor(Math.random() * message_options.length)
+                        var chosen_message = message_options[random_index]
+
+                        bot.reply(message, chosen_message + 'Change your text and try again!');
                     }
-                } catch (err) {
-                    console.log("Error: " + err.message);
+                });
 
-                    var message_options = [
-                        'What nonsense was that? That\'s just rude! ',
-                        'Don\'t get me to do impossible things! Mutual respect goes both ways! ',
-                        'What is that seriously..? ',
-                        'That translation is way above my pay grade. ',
-                        'That\'s too hard! '
-                    ]
-                    var random_index = Math.floor(Math.random() * message_options.length)
-                    var chosen_message = message_options[random_index]
-
-                    bot.reply(message, chosen_message + 'Change your text and try again!');
-                }
+            }).on("error", (err) => {
+                console.log("Error: " + err.message);
             });
-
-        }).on("error", (err) => {
-            console.log("Error: " + err.message);
-        });
+        })
 
     });
 
