@@ -2,14 +2,13 @@ const https = require('https');
 
 module.exports = function (controller, writeIntoFirebase, database) {
 
-    var room_lang = {};
+    // var room_lang = {};
     const baseUrl = 'https://translate.yandex.net/api/v1.5/tr.json/';
     const key = 'trnsl.1.1.20180117T004805Z.b129a8b3ea79d22f.b7a43b194303543b45ded23a0b6890c124dc205e';
 
 
     // show list of translation languages supported
     controller.hears('-show', 'direct_message,direct_mention', function (bot, message) {
-        writeIntoFirebase(message);
         bot.reply(message, lang_list2);
     });
 
@@ -20,9 +19,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     // set language to translate to. eg. translate to mandarin
     controller.hears('-lang *', 'direct_message,direct_mention', function (bot, message) {
-
-        var personEmail = message.data.personEmail;
-        var this_roomId = message.data.roomId;
         var langCode_str = message.text.substr(message.text.indexOf(" ") + 1);
 
         if (langCode_str.length != 5) {
@@ -30,57 +26,46 @@ module.exports = function (controller, writeIntoFirebase, database) {
             return;
         }
 
-        var langCode_toChange = langCode_str.substr(langCode_str.indexOf("-") + 1);;
+        var langCode_toChange = langCode_str.substr(3, 5);;
         var langCode_from = langCode_str.substr(0, 2);
 
-        console.log("from: " + langCode_from);
-        console.log("to : " + langCode_toChange);
+        // console.log("from: " + langCode_from);
+        // console.log("to : " + langCode_toChange);
 
         if (lang_list[langCode_toChange] === undefined || lang_list[langCode_from] === undefined) {
             bot.reply(message, 'That is not a valid translation! Please enter in this format `-lang en-fr`. Enter `-show` to see the list of supported languages!');
         } else {
-            console.log(personEmail);
+            console.log(message.data.personEmail);
             console.log(langCode_str);
 
-            database.ref('translate/' + message.data.roomId + '/' + message.data.personId + '/').set({
+            database.ref('settings-translate').child('roomId=' + message.data.roomId).child('personId=' + message.data.personId).set({
                 'lang': langCode_str,
                 'personEmail': message.data.personEmail
             });
 
+            database.ref('history-settings-translate').push().set({
+                roomId: message.data.roomId,
+                created: message.data.created,
+                personEmail: message.data.personEmail,
+                langFrom: langCode_from,
+                langTo: langCode_toChange
+            })
 
-            if (room_lang[this_roomId] === undefined) {
-                var b = {};
-                b[personEmail] = langCode_str;
-                console.log(b);
-
-                room_lang[this_roomId] = b;
-            } else {
-                var b = room_lang[this_roomId];
-                b[personEmail] = langCode_str;
-            }
-
-            console.log(room_lang);
-
-            bot.reply(message, 'Ok! **' + lang_list[langCode_from] + '** will be translated to **' + lang_list[langCode_toChange] + '** for <@personEmail:' + personEmail + '>!');
+            bot.reply(message, 'Ok! **' + lang_list[langCode_from] + '** will be translated to **' + lang_list[langCode_toChange] + '** for <@personEmail:' + message.data.personEmail + '>!');
         }
     });
 
 
     // to translate text 
     controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
-        writeIntoFirebase(message);
 
         var personEmail = message.data.personEmail;
 
         console.log("translating: " + message.text + ' for <@personEmail:' + personEmail + '>');
 
-        const feature = 'translate';
-        var this_roomId = message.data.roomId;
         var query = message.text.substr(message.text.indexOf(" ") + 1);
 
-        database.ref('/translate/' + message.data.roomId + '/' + message.data.personId + '/').once('value').then(function (snapshot) {
-            console.log("myval: " + snapshot.val().lang);
-
+        database.ref('/settings-translate/').child('roomId=' + message.data.roomId).child('personId=' + message.data.personId).once('value').then(function (snapshot) {
             var lang = snapshot.val().lang;
 
             if (lang === undefined) {
@@ -88,8 +73,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 return;
             }
 
-            var req = baseUrl + feature + "?key=" + key + "&lang=" + lang + "&text=" + query;
-
+            var req = baseUrl + "translate?key=" + key + "&lang=" + lang + "&text=" + query;
 
             https.get(req, (resp) => {
                 let data = '';
@@ -102,18 +86,28 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
                 // The whole response has been received. Print out the result.
                 resp.on('end', () => {
-                    // console.log("headers: " + JSON.stringify(resp.headers));
                     try {
                         var toJson = JSON.parse(data);
 
                         if (toJson.code == 200) {
                             console.log("data: " + toJson.text);
-                            // console.log(JSON.parse(data).explanation);
+
+                            database.ref('/history-translate/').child('roomId=' + message.data.roomId).push().set({
+                                personId: message.data.personId,
+                                personEmail: personEmail,
+                                dateTime: message.data.created,
+                                langFrom: lang.substr(0, 2),
+                                langTo: lang.substr(3, 5),
+                                org_text: query,
+                                trans_text: toJson.text[0]
+                            });
+
                             bot.reply(message, 'Translating: ' + query + ' \n>' + toJson.text[0]);
                         } else {
                             bot.reply(message, 'Something went wrong! **Bambot** is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
                         }
                     } catch (err) {
+
                         console.log("Error: " + err.message);
 
                         var message_options = [
