@@ -1,4 +1,5 @@
 const https = require('https');
+const request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
 
@@ -35,16 +36,15 @@ module.exports = function (controller, writeIntoFirebase, database) {
         if (lang_list[langCode_toChange] === undefined || lang_list[langCode_from] === undefined) {
             bot.reply(message, 'That is not a valid translation! Please enter in this format `-lang en-fr`. Enter `-show` to see the list of supported languages!');
         } else {
-            console.log(message.data.personEmail);
-            console.log(langCode_str);
+            // console.log(message.data.personEmail);
+            // console.log(langCode_str);
 
             database.ref('settings-translate').child('roomId=' + message.data.roomId).child('personId=' + message.data.personId).set({
                 'lang': langCode_str,
                 'personEmail': message.data.personEmail
             });
 
-            database.ref('history-settings-translate').push().set({
-                roomId: message.data.roomId,
+            database.ref('history-settings-translate').child('roomId=' + message.data.roomId).child('personId=' + message.data.personId).push().set({
                 created: message.data.created,
                 personEmail: message.data.personEmail,
                 langFrom: langCode_from,
@@ -59,9 +59,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
     // to translate text 
     controller.hears('-t *', 'direct_message,direct_mention', function (bot, message) {
 
-        var personEmail = message.data.personEmail;
-
-        console.log("translating: " + message.text + ' for <@personEmail:' + personEmail + '>');
+        console.log("translating: " + message.text + ' for <@personEmail:' + message.data.personEmail + '>');
 
         var query = message.text.substr(message.text.indexOf(" ") + 1);
 
@@ -86,6 +84,8 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
                 // The whole response has been received. Print out the result.
                 resp.on('end', () => {
+
+                    console.log("headers: " + JSON.stringify(resp.headers));
                     try {
                         var toJson = JSON.parse(data);
 
@@ -94,7 +94,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
                             database.ref('/history-translate/').child('roomId=' + message.data.roomId).push().set({
                                 personId: message.data.personId,
-                                personEmail: personEmail,
+                                personEmail: message.data.personEmail,
                                 dateTime: message.data.created,
                                 langFrom: lang.substr(0, 2),
                                 langTo: lang.substr(3, 5),
