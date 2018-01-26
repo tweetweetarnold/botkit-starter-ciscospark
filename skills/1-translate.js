@@ -63,52 +63,55 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
         var query = message.text.substr(message.text.indexOf(" ") + 1);
 
-        database.ref('/settings-translate/').child('roomId=' + message.data.roomId).child('personId=' + message.data.personId).once('value').then(function (snapshot) {
-            var lang = snapshot.val().lang;
+        database.ref('/settings-translate/')
+            .child('roomId=' + message.data.roomId)
+            .child('personId=' + message.data.personId)
+            .once('value')
+            .then(function (snapshot) {
 
-            if (lang === undefined) {
-                bot.reply(message, "Language not set! See the list of supported languages using `-show`");
-                return;
-            }
+                var lang = snapshot.val().lang;
 
-            var req = baseUrl + "translate?key=" + key + "&lang=" + lang + "&text=" + query;
+                console.log("lang: " + lang);
 
-            https.get(req, (resp) => {
-                let data = '';
-                resp.setEncoding('utf8');
+                if (lang === undefined) {
+                    bot.reply(message, "Language not set! See the list of supported languages using `-show`");
+                    return;
+                }
 
-                // A chunk of data has been received.
-                resp.on('data', (chunk) => {
-                    data += chunk;
-                });
+                var req = baseUrl + "translate?key=" + key + "&lang=" + lang + "&text=" + query;
 
-                // The whole response has been received. Print out the result.
-                resp.on('end', () => {
 
-                    console.log("headers: " + JSON.stringify(resp.headers));
-                    try {
-                        var toJson = JSON.parse(data);
+                var options = {
+                    url: encodeURI(req),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                };
 
-                        if (toJson.code == 200) {
-                            console.log("data: " + toJson.text);
+                request(options, function (error, response, body) {
+                    console.log('error:', error); // Print the error if one occurred
+                    // console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+                    console.log('body:', body); // Print the HTML for the Google homepage.
 
-                            database.ref('/history-translate/').child('roomId=' + message.data.roomId).push().set({
+                    if (!error && response.statusCode == 200) {
+
+                        var bodyJson = JSON.parse(body);
+
+                        database.ref('/history-translate/')
+                            .child('roomId=' + message.data.roomId)
+                            .push()
+                            .set({
                                 personId: message.data.personId,
                                 personEmail: message.data.personEmail,
                                 dateTime: message.data.created,
                                 langFrom: lang.substr(0, 2),
                                 langTo: lang.substr(3, 5),
                                 org_text: query,
-                                trans_text: toJson.text[0]
+                                trans_text: bodyJson.text
                             });
 
-                            bot.reply(message, 'Translating: ' + query + ' \n>' + toJson.text[0]);
-                        } else {
-                            bot.reply(message, 'Something went wrong! **Bambot** is unhappy! Code: ' + toJson.code + ". Message: " + toJson.message);
-                        }
-                    } catch (err) {
-
-                        console.log("Error: " + err.message);
+                        bot.reply(message, 'Translating: ' + query + ' \n>' + bodyJson.text);
+                    } else {
 
                         var message_options = [
                             'What nonsense was that? That\'s just rude! ',
@@ -117,19 +120,18 @@ module.exports = function (controller, writeIntoFirebase, database) {
                             'That translation is way above my pay grade. ',
                             'That\'s too hard! '
                         ]
-                        var random_index = Math.floor(Math.random() * message_options.length)
-                        var chosen_message = message_options[random_index]
+                        var random_index = Math.floor(Math.random() * message_options.length);
+                        var chosen_message = message_options[random_index];
 
-                        bot.reply(message, chosen_message + 'Change your text and try again!');
+                        bot.reply(message, chosen_message + 'Change your text again!');
+
                     }
-                });
 
-            }).on("error", (err) => {
-                console.log("Error: " + err.message);
+                })
+
             });
-        })
+    })
 
-    });
 
 
     var lang_list = {
@@ -234,4 +236,4 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
 
 
-}
+};
