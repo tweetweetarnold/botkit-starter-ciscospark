@@ -107,7 +107,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                                 langFrom: lang.substr(0, 2),
                                 langTo: lang.substr(3, 5),
                                 org_text: query,
-                                trans_text: bodyJson.text
+                                trans_text: bodyJson.text[0]
                             });
 
                         bot.reply(message, 'Translating: ' + query + ' \n>' + bodyJson.text);

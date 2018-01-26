@@ -71,12 +71,11 @@ controller.hears('-console', 'direct_message,direct_mention', function (bot, mes
 });
 
 controller.on('direct_mention', function (bot, message) {
-    console.log(JSON.stringify(message));
     bot.reply(message, 'You mentioned me and said, "' + message.text + '"');
 });
 
 controller.on('direct_message', function (bot, message) {
-    bot.reply(message, 'I got your private message. You said, "' + message.text + '"');
+    bot.reply(message, '# I am #Grumpy');
 });
 
 controller.on('bot_space_join', function (bot, message) {
