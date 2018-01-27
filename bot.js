@@ -21,6 +21,7 @@ var firebaseConfig = {
     // storageBucket: "bucket.appspot.com"
 };
 firebase.initializeApp(firebaseConfig);
+console.log("FIREBASE: Initialized!");
 var database = firebase.database();
 
 

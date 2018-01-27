@@ -1,4 +1,3 @@
-const https = require('https');
 const request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
@@ -12,6 +11,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
     controller.hears('-show', 'direct_message,direct_mention', function (bot, message) {
         bot.reply(message, lang_list2);
     });
+
 
     // detect language
     controller.hears('-dt *', 'direct_message,direct_mention', function (bot, message) {
@@ -110,7 +110,11 @@ module.exports = function (controller, writeIntoFirebase, database) {
                                 trans_text: bodyJson.text[0]
                             });
 
-                        bot.reply(message, 'Translating: ' + query + ' \n>' + bodyJson.text);
+                        bot.startConversation(message, function (error, convo) {
+                            convo.say('Translating: ' + query);
+                            convo.say('>' + bodyJson.text);
+                        })
+
                     } else {
 
                         var message_options = [

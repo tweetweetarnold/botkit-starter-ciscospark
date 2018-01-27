@@ -16,7 +16,6 @@ module.exports = function (controller, writeIntoFirebase) {
         var random_index = Math.floor(Math.random() * message_options.length)
         var chosen_message = message_options[random_index]
 
-        // console.log(JSON.stringify(message));
         writeIntoFirebase(message);
 
         bot.reply(message, chosen_message)
