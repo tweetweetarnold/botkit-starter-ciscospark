@@ -1,4 +1,4 @@
-import { encode } from 'punycode';
+// import { encode } from 'punycode';
 
 const request = require('request');
 
@@ -89,7 +89,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                         'Content-Type': 'application/json; charset=utf-8'
                     }, qs: {
                         key: key,
-                        text: encode(query),
+                        text: query,
                         lang: lang
                     }
                 };
