@@ -1,3 +1,5 @@
+import { encode } from 'punycode';
+
 const request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
@@ -78,13 +80,17 @@ module.exports = function (controller, writeIntoFirebase, database) {
                     return;
                 }
 
-                var req = baseUrl + "translate?key=" + key + "&lang=" + lang + "&text=" + query;
+                // var req = baseUrl + "translate?key=" + key + "&lang=" + lang + "&text=" + query;
 
 
                 var options = {
-                    url: encodeURI(req),
+                    url: 'https://translate.yandex.net/api/v1.5/tr.json/translate',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/json; charset=utf-8'
+                    }, qs: {
+                        key: key,
+                        text: encode(query),
+                        lang: lang
                     }
                 };
 
