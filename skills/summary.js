@@ -10,7 +10,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
             console.log('translateCountMapResult...');
             var returnString = "";
             for (var myKey in map) {
-                returnString = returnString + "- <@personEmail:" + myKey + ">, count:" + map[myKey] + "\n";
+                returnString = returnString + "-" + myKey + ", count:" + map[myKey] + "\n";
             }
             bot.reply(message, returnString);
         }
