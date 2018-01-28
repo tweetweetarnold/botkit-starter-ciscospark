@@ -1,10 +1,8 @@
 const request = require('request');
 
-module.exports = function (controller, writeIntoFirebase) {
+module.exports = function (controller, writeIntoFirebase, database) {
 
     controller.hears('-summary', 'direct_message,direct_mention', function (bot, message) {
-
-        // bot.startConversation(message, function (err, convo) {
 
         bot.reply(message, "Displaying analysis summary for this room...");
 
@@ -32,26 +30,24 @@ module.exports = function (controller, writeIntoFirebase) {
                 bot.say('Something went wrong! Talk to the administrator!');
             }
 
-            bot.reply(message, 'There are ' + (jsonResponse.items.length - 1) + ' members in this space! \n\n' +
-                'Top 3 \"noisest\" people are: \n' +
-                '1. Thomson (500 messages)\n' +
-                '2. Arnold (300 messages)\n' +
-                '3. Sing Yuen (100 messages)');
+            bot.reply(message, 'There are ' + (jsonResponse.items.length - 1) + ' members in this space!');
             console.log("NUM OF PEOPLE: " + jsonResponse.items.length);
 
 
-            
+            var translationCount = 0;
+            database.ref('history-translate').child('roomId=' + message.data.roomId).orderByKey()
+                .once('value').then(function (snapshot) {
+                    console.log("VALUE2: " + Object.keys(snapshot.val()).length);
+                    translationCount = Object.keys(snapshot.val()).length;
 
-
+                    bot.reply(message, 'Translation has been carried out ' + translationCount + ' times!');
+                })
 
 
         })
 
-        // convo.say('Done!');
 
 
     })
-
-    // });
 
 }
