@@ -13,7 +13,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
             for (var myKey in map) {
                 result = result + "- <@personEmail:" + myKey + ">, count: " + map[myKey] + "\n";
             }
-            bot.reply(message, result);
+            bot.reply(message, 'Num. of translations by people: \n' + result);
         }
 
         var mostTranslatedMapResult = function (map) {
@@ -24,10 +24,9 @@ module.exports = function (controller, writeIntoFirebase, database) {
             for (var myKey in map) {
                 result = result + "- " + lang_list[myKey] + ", count: " + map[myKey] + "\n";
             }
-            bot.reply(message, result);
+            bot.reply(message, 'Num. of translations by language: \n' + result);
 
         }
-
 
 
         bot.reply(message, "Displaying analysis summary for this room...");
@@ -61,9 +60,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
                         console.log("VALUE3: " + snapshot.numChildren());
                         translationCount = snapshot.numChildren();
 
-                        bot.reply(message, 'Translation has been carried out ' + translationCount + ' times!');
-
-
                         snapshot.forEach(function (childSnapshot) {
                             console.log('KEY: ' + childSnapshot.key);
 
@@ -90,6 +86,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
                         })
 
+                        bot.reply(message, 'Translation has been carried out ' + translationCount + ' times!');
                         translateCountMapResult(translateCountMap);
                         mostTranslatedMapResult(mostTranslatedLangMap);
 
