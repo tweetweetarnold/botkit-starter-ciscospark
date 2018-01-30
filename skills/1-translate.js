@@ -117,7 +117,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                             });
 
                         bot.startConversation(message, function (error, convo) {
-                            convo.say('Translating: ' + query);
+                            convo.say('Translating to ' + lang_list[lang.substr(3, 5)] + ': ' + query);
                             convo.say('>' + bodyJson.text);
                         })
 
