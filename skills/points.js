@@ -2,7 +2,7 @@ var request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
 
-    controller.hears(['-points *'], 'direct_message,direct_mention', function (bot, message) {
+    controller.hears(['-p *'], 'direct_message,direct_mention', function (bot, message) {
 
         var addOrMinus = message.text.charAt(message.text.length - 1);
         // message.text.substr(message.text)
