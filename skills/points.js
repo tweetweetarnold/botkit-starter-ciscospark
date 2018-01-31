@@ -24,7 +24,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
         taggedPeople.forEach(function (personId) {
 
             if (personId != 'Y2lzY29zcGFyazovL3VzL1BFT1BMRS82NTAzYzgwNC1lMDJhLTRhMGYtYjczYi02NDc2NThiNmNjYzk') {
-                var personRef = database.ref('points').child('personId=' + personId);
+                var personRef = database.ref('ranking').child('personId=' + personId);
 
                 personRef.once('value').then(function (snapshot) {
                     var personPoints = 0;
@@ -68,17 +68,12 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
         taggedPeople.forEach(function (personId) {
             if (personId != 'Y2lzY29zcGFyazovL3VzL1BFT1BMRS82NTAzYzgwNC1lMDJhLTRhMGYtYjczYi02NDc2NThiNmNjYzk') {
-                var personReasonRef = database.ref('points').child('personId=' + personId).child('reasons');
+                var personReasonRef = database.ref('ranking').child('personId=' + personId).child('reasons');
                 // personRef.child('points');
 
                 console.log("ID: " + personId);
                 personReasonRef.orderByKey().limitToLast(3).once('value').then(function (snapshot) {
                     console.log("LAST3: " + JSON.stringify(snapshot.val()));
-
-
-
-
-
 
                 })
 
@@ -92,7 +87,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     controller.hears(['-display'], 'direct_message,direct_mention', function (bot, message) {
 
-        database.ref('points').orderByValue().once('value').then(function (snapshot) {
+        database.ref('ranking').once('value').then(function (snapshot) {
 
             var returnString = "";
 
@@ -111,13 +106,13 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 }, function (error, response, body) {
 
                     var jsonResponse = JSON.parse(body);
-                    console.log("NAME: " + jsonResponse.items[0].displayName);
+                    // console.log("NAME: " + jsonResponse.items[0].displayName);
                     var name = jsonResponse.items[0].displayName;
 
                     var points = childSnapshot.val().points;
 
                     if (name != "BamBot") {
-                        bot.reply(message, name + " :  " + points);
+                        bot.reply(message, points + " :  " + name);
                     }
 
                 })
