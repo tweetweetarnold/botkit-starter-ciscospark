@@ -3,11 +3,9 @@ const request = require('request');
 module.exports = function (controller, writeIntoFirebase, database) {
 
 
-    controller.hears('-summary', 'direct_message,direct_mention', function (bot, message) {
+    controller.hears('^-summary$', 'direct_message,direct_mention', function (bot, message) {
 
         var translateCountMapResult = function (map) {
-            console.log('translateCountMapResult...');
-            console.log("translateCountMapResult: " + JSON.stringify(map));
             var result = "";
 
             for (var myKey in map) {
@@ -17,8 +15,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
         }
 
         var mostTranslatedMapResult = function (map) {
-            console.log('mostTranslatedMapResult...');
-            console.log("mostTranslatedMapResult: " + JSON.stringify(map));
             var result = "";
 
             for (var myKey in map) {
@@ -56,15 +52,12 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
                 database.ref('history-translate').child('roomId=' + message.data.roomId).orderByKey()
                     .once('value').then(function (snapshot) {
-                        // console.log("VALUE2: " + Object.keys(snapshot.val()).length);
-                        console.log("VALUE3: " + snapshot.numChildren());
                         translationCount = snapshot.numChildren();
 
                         snapshot.forEach(function (childSnapshot) {
                             console.log('KEY: ' + childSnapshot.key);
 
                             var childBody = childSnapshot.val();
-                            console.log('CHILD: ' + JSON.stringify(childBody));
 
                             console.log("personEmail: " + childBody.personEmail);
 
@@ -81,9 +74,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
                             translateCountMap[childBody.personEmail] = translateCountMap[childBody.personEmail] + 1;
                             mostTranslatedLangMap[childBody.langTo] = mostTranslatedLangMap[childBody.langTo] + 1;
 
-                            console.log('TRANSLATE COUNT2: ' + JSON.stringify(translateCountMap));
-                            console.log("MOST TRANSLATED LANGMAP: " + JSON.stringify(mostTranslatedLangMap));
-
                         })
 
                         bot.reply(message, 'Translation has been carried out ' + translationCount + ' times!');
@@ -99,8 +89,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
             }
 
             bot.reply(message, 'There are ' + (jsonResponse.items.length - 1) + ' members in this space!');
-            console.log("NUM OF PEOPLE: " + jsonResponse.items.length);
-
         })
 
     })

@@ -1,7 +1,7 @@
 
 module.exports = function (controller, writeIntoFirebase) {
 
-    controller.hears('bam', 'direct_message,direct_mention', function (bot, message) {
+    controller.hears('^bam$', 'direct_message,direct_mention', function (bot, message) {
         var message_options = [
             "Did I just hear a bam? BAM!!!!",
             "Woah! You like bam? Me too!",

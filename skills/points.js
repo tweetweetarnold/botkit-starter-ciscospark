@@ -85,7 +85,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
 
 
-    controller.hears(['-display'], 'direct_message,direct_mention', function (bot, message) {
+    controller.hears(['^-display$'], 'direct_message,direct_mention', function (bot, message) {
 
         database.ref('ranking').once('value').then(function (snapshot) {
 

@@ -10,13 +10,8 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
 
     // show list of translation languages supported
-    controller.hears('-show', 'direct_message,direct_mention', function (bot, message) {
+    controller.hears('^-show$', 'direct_message,direct_mention', function (bot, message) {
         bot.reply(message, lang_list2);
-    });
-
-
-    // detect language
-    controller.hears('-dt *', 'direct_message,direct_mention', function (bot, message) {
     });
 
 
@@ -38,9 +33,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
         if (lang_list[langCode_toChange] === undefined || lang_list[langCode_from] === undefined) {
             bot.reply(message, 'That is not a valid translation! Please enter in this format `-lang en-fr`. Enter `-show` to see the list of supported languages!');
         } else {
-            // console.log(message.data.personEmail);
-            // console.log(langCode_str);
-
             database.ref('settings-translate').child('roomId=' + message.data.roomId).child('personId=' + message.data.personId).set({
                 'lang': langCode_str,
                 'personEmail': message.data.personEmail
@@ -79,9 +71,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
                     bot.reply(message, "Language not set! See the list of supported languages using `-show`");
                     return;
                 }
-
-                // var req = baseUrl + "translate?key=" + key + "&lang=" + lang + "&text=" + query;
-
 
                 var options = {
                     url: 'https://translate.yandex.net/api/v1.5/tr.json/translate',

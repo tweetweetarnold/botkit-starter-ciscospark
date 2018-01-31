@@ -1,7 +1,7 @@
 
 module.exports = function (controller, writeIntoFirebase) {
 
-    controller.hears(['hello', 'hey', 'hi', 'aloha'], 'direct_message,direct_mention', function (bot, message) {
+    controller.hears(['^hello$', '^hey$', '^hi$', '^aloha$'], 'direct_message,direct_mention', function (bot, message) {
         var message_options = [
             "Hello!",
             "Hello <@personEmail:" + message.user + ">!",

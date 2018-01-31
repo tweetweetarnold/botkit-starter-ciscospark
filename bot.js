@@ -51,10 +51,6 @@ var normalizedPath = require("path").join(__dirname, "skills");
 require("fs").readdirSync(normalizedPath).forEach(function (file) {
     require("./skills/" + file)(controller, writeIntoFirebase, database);
 });
-normalizedPath = require("path").join(__dirname, "skills2");
-require("fs").readdirSync(normalizedPath).forEach(function (file) {
-    require("./skills2/" + file)(controller, writeIntoFirebase, database);
-});
 
 //
 // ************************ Setup config ends here ************************
@@ -80,7 +76,7 @@ controller.on('direct_mention', function (bot, message) {
 });
 
 controller.on('direct_message', function (bot, message) {
-    bot.reply(message, '# I am #Grumpy');
+    bot.reply(message, '# I did not understand that! I am #Grumpy');
 });
 
 controller.on('bot_space_join', function (bot, message) {
