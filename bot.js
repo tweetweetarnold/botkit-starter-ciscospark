@@ -51,6 +51,10 @@ var normalizedPath = require("path").join(__dirname, "skills");
 require("fs").readdirSync(normalizedPath).forEach(function (file) {
     require("./skills/" + file)(controller, writeIntoFirebase, database);
 });
+normalizedPath = require("path").join(__dirname, "skills2");
+require("fs").readdirSync(normalizedPath).forEach(function (file) {
+    require("./skills2/" + file)(controller, writeIntoFirebase, database);
+});
 
 //
 // ************************ Setup config ends here ************************
