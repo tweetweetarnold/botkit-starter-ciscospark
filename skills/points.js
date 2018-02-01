@@ -40,6 +40,9 @@ module.exports = function (controller, writeIntoFirebase, database) {
                         personRef.update({
                             points: personPoints + 1
                         })
+                        // database.ref('pointscounter').update({
+                            
+                        // })
                         personRef.child('reasons').push({
                             add: true,
                             reason: thisReason
@@ -83,43 +86,92 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     })
 
+    function getDisplayName(key, bot, message, childSnapshot){
+        var arr = [];
+
+        request({
+            url: 'https://api.ciscospark.com/v1/people',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Authorization': 'Bearer ' + process.env.access_token
+            },
+            qs: {
+                'id': key
+            }
+        }, function (error, response, body) {
+
+            var jsonResponse = JSON.parse(body);
+            // console.log("NAME: " + jsonResponse.items[0].displayName);
+            var name = jsonResponse.items[0].displayName;
+
+            var points = childSnapshot.val().points;
+
+            if (name != "BamBot") {
+                console.log("NAME: " + name);
+                bot.reply(message, points + " :  " + name);
+                // returnString += returnString + points + " :  " + name + " \n ";
+                // arr.push(name);
+                // return new Promise(name);
+            }
+
+        })
+        // console.log("ARRAY: " + arr)
+        // return name;
+        // return returnString;
+    }
+
 
 
     controller.hears(['^-display$'], 'direct_message,direct_mention', function (bot, message) {
 
+
+        var returnString = "";
+
         database.ref('ranking').once('value').then(function (snapshot) {
 
-            var returnString = "";
+            // var returnString = "";
+            // var arr = [];
 
             snapshot.forEach(function (childSnapshot) {
                 var key = childSnapshot.key.substr(9, childSnapshot.key.length - 1);
+                console.log("inside for each");
 
-                request({
-                    url: 'https://api.ciscospark.com/v1/people',
-                    headers: {
-                        'Content-Type': 'application/json; charset=utf-8',
-                        'Authorization': 'Bearer ' + process.env.access_token
-                    },
-                    qs: {
-                        'id': key
-                    }
-                }, function (error, response, body) {
-
-                    var jsonResponse = JSON.parse(body);
-                    // console.log("NAME: " + jsonResponse.items[0].displayName);
-                    var name = jsonResponse.items[0].displayName;
-
-                    var points = childSnapshot.val().points;
-
-                    if (name != "BamBot") {
-                        bot.reply(message, points + " :  " + name);
-                    }
-
-                })
+                returnString = getDisplayName(key, bot, message, childSnapshot);
 
             })
 
+            console.log("RETURNSTRING display: " + returnString);
+            // console.log("ARR: "+ arr);
 
+            // Promise.all(returnString);
+        })
+
+    })
+
+
+
+    controller.hears(['^dp$'], 'direct_message,direct_mention', function (bot, message) {
+
+
+        var returnString = "";
+
+        database.ref('ranking').once('value').then(function (snapshot) {
+
+            // var returnString = "";
+            // var arr = [];
+
+            snapshot.forEach(function (childSnapshot) {
+                var key = childSnapshot.key.substr(9, childSnapshot.key.length - 1);
+                console.log("inside for each");
+
+                returnString = getDisplayName(key, bot, message, childSnapshot);
+
+            })
+
+            console.log("RETURNSTRING display: " + returnString);
+            // console.log("ARR: "+ arr);
+
+            // Promise.all(returnString);
         })
 
     })
