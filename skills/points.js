@@ -2,7 +2,23 @@ var request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
 
-    
+    function updatePoints(personId, increment) {
+        var personRef = database.ref('ranking').child('personId=' + personId);
+
+        personRef.once('value').then(function (snapshot) {
+            var personPoints = 0
+            if (snapshot.val() != null) {
+                personPoints = snapshot.val().points;
+            }
+
+            personRef.update({
+                points: personPoints + increment
+            })
+        })
+
+    }
+
+
     controller.hears(['-p *'], 'direct_message,direct_mention', function (bot, message) {
 
         var addOrMinus = message.text.charAt(message.text.length - 1);
@@ -12,6 +28,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
         addOrMinus = arr[2];
         var startIndex = message.text.indexOf("#") + 1;
         console.log("STARTINDEX: " + startIndex);
+
         if (startIndex == 0) {
             bot.reply(message, "Did not find reasoning. Terminating...");
             return;
@@ -26,28 +43,16 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 var personRef = database.ref('ranking').child('personId=' + personId);
 
                 personRef.once('value').then(function (snapshot) {
-                    var personPoints = 0;
-                    if (snapshot.val() != null) {
-                        personPoints = snapshot.val().points;
-                    }
-
-                    if (personPoints === null) {
-                        personPoints = 0;
-                    }
 
                     if (addOrMinus === "+") {
-                        personRef.update({
-                            points: personPoints + 1
-                        })
+                        updatePoints(personId, 1)
                         personRef.child('reasons').push({
                             add: true,
                             reason: thisReason
                         })
 
                     } else if (addOrMinus === "-") {
-                        personRef.update({
-                            points: personPoints - 1
-                        })
+                        updatePoints(personId, -1)
                         personRef.child('reasons').push({
                             add: false,
                             reason: thisReason
@@ -135,5 +140,35 @@ module.exports = function (controller, writeIntoFirebase, database) {
         })
 
     })
+
+
+
+    controller.hears(['-challenge *'], 'direct_message,direct_mention', function (bot, message) {
+        var taggedPeople = message.data.mentionedPeople;
+        console.log("MESSAGE: " + JSON.stringify(message));
+
+        var challenger = message.data.personId;
+        var victim = "";
+        console.log("message;" + JSON.stringify(message.data.personId))
+
+        if (taggedPeople.length != 2) {
+            bot.reply(message, "Invalid! Type @Bambot -challenge <person you challenging>");
+            return;
+        }
+
+        taggedPeople.forEach(function (personId) {
+
+            if (personId == 'Y2lzY29zcGFyazovL3VzL1BFT1BMRS82NTAzYzgwNC1lMDJhLTRhMGYtYjczYi02NDc2NThiNmNjYzk') {
+                return;
+            }
+            // do calculation here
+            victim = personId;
+
+            //updatePoints(personId, increment)
+
+        });
+
+    })
+
 
 }

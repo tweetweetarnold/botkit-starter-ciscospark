@@ -79,13 +79,12 @@ module.exports = function (controller, writeIntoFirebase, database) {
                         bot.reply(message, 'Translation has been carried out ' + translationCount + ' times!');
                         translateCountMapResult(translateCountMap);
                         mostTranslatedMapResult(mostTranslatedLangMap);
-
                     })
 
 
             } else {
                 console.log(error);
-                bot.say('Something went wrong! Talk to the administrator!');
+                bot.reply(message, 'Something went wrong! Talk to the administrator!');
             }
 
             bot.reply(message, 'There are ' + (jsonResponse.items.length - 1) + ' members in this space!');
