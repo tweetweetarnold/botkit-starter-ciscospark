@@ -2,11 +2,12 @@ var request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
 
+    
     controller.hears(['-p *'], 'direct_message,direct_mention', function (bot, message) {
 
         var addOrMinus = message.text.charAt(message.text.length - 1);
-        // message.text.substr(message.text)
         var arr = message.text.toString().split(" ");
+
         console.log("arr: " + arr[2]);
         addOrMinus = arr[2];
         var startIndex = message.text.indexOf("#") + 1;
@@ -16,8 +17,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
             return;
         }
         var thisReason = message.text.substr(startIndex, message.text.length - 1);
-
-        console.log("REASON: " + thisReason);
 
         var taggedPeople = message.data.mentionedPeople;
 
@@ -40,9 +39,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
                         personRef.update({
                             points: personPoints + 1
                         })
-                        // database.ref('pointscounter').update({
-                            
-                        // })
                         personRef.child('reasons').push({
                             add: true,
                             reason: thisReason
@@ -65,113 +61,77 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     })
 
-    controller.hears(['-reasons *'], 'direct_message,direct_mention', function (bot, message) {
+    // controller.hears(['-reasons *'], 'direct_message,direct_mention', function (bot, message) {
 
-        var taggedPeople = message.data.mentionedPeople;
+    //     var taggedPeople = message.data.mentionedPeople;
 
-        taggedPeople.forEach(function (personId) {
-            if (personId != 'Y2lzY29zcGFyazovL3VzL1BFT1BMRS82NTAzYzgwNC1lMDJhLTRhMGYtYjczYi02NDc2NThiNmNjYzk') {
-                var personReasonRef = database.ref('ranking').child('personId=' + personId).child('reasons');
-                // personRef.child('points');
+    //     taggedPeople.forEach(function (personId) {
+    //         if (personId != 'Y2lzY29zcGFyazovL3VzL1BFT1BMRS82NTAzYzgwNC1lMDJhLTRhMGYtYjczYi02NDc2NThiNmNjYzk') {
+    //             var personReasonRef = database.ref('ranking').child('personId=' + personId).child('reasons');
+    //             // personRef.child('points');
 
-                console.log("ID: " + personId);
-                personReasonRef.orderByKey().limitToLast(3).once('value').then(function (snapshot) {
-                    console.log("LAST3: " + JSON.stringify(snapshot.val()));
+    //             console.log("ID: " + personId);
+    //             personReasonRef.orderByKey().limitToLast(3).once('value').then(function (snapshot) {
+    //                 console.log("LAST3: " + JSON.stringify(snapshot.val()));
 
-                })
+    //             })
 
 
-            }
-        })
+    //         }
+    //     })
 
-    })
+    // })
 
-    function getDisplayName(key, bot, message, childSnapshot){
-        var arr = [];
 
-        request({
-            url: 'https://api.ciscospark.com/v1/people',
-            headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-                'Authorization': 'Bearer ' + process.env.access_token
-            },
-            qs: {
-                'id': key
-            }
-        }, function (error, response, body) {
+    function getDisplayName(key) {
 
-            var jsonResponse = JSON.parse(body);
-            // console.log("NAME: " + jsonResponse.items[0].displayName);
-            var name = jsonResponse.items[0].displayName;
+        return new Promise(function (resolve, reject) {
 
-            var points = childSnapshot.val().points;
-
-            if (name != "BamBot") {
-                console.log("NAME: " + name);
-                bot.reply(message, points + " :  " + name);
-                // returnString += returnString + points + " :  " + name + " \n ";
-                // arr.push(name);
-                // return new Promise(name);
-            }
+            request({
+                url: 'https://api.ciscospark.com/v1/people',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'Authorization': 'Bearer ' + process.env.access_token
+                },
+                qs: {
+                    'id': key
+                }
+            }, function (error, response, body) {
+                resolve(JSON.parse(body))
+            })
 
         })
-        // console.log("ARRAY: " + arr)
-        // return name;
-        // return returnString;
+
     }
 
 
+    controller.hears(['^-dp$'], 'direct_message,direct_mention', function (bot, message) {
 
-    controller.hears(['^-display$'], 'direct_message,direct_mention', function (bot, message) {
+        database.ref('ranking').orderByChild('points').once('value').then(function (snapshot) {
 
-
-        var returnString = "";
-
-        database.ref('ranking').once('value').then(function (snapshot) {
-
-            // var returnString = "";
-            // var arr = [];
+            var displayNamePromiseArr = [];
+            var pointsArr = [];
 
             snapshot.forEach(function (childSnapshot) {
                 var key = childSnapshot.key.substr(9, childSnapshot.key.length - 1);
-                console.log("inside for each");
+                var points = childSnapshot.val().points;
 
-                returnString = getDisplayName(key, bot, message, childSnapshot);
+                pointsArr.push(points)
+
+                var displayNamePromise = getDisplayName(key);
+                displayNamePromiseArr.push(displayNamePromise);
+            })
+
+            Promise.all(displayNamePromiseArr).then(function (result) {
+                // building messages
+                var returnString = "";
+                for (var i = pointsArr.length - 1; i >= 0; i--) {
+                    returnString = returnString + "- " + pointsArr[i] + " : " + result[i].items[0].displayName + "\n"
+                }
+                bot.reply(message, returnString);
 
             })
 
-            console.log("RETURNSTRING display: " + returnString);
-            // console.log("ARR: "+ arr);
-
-            // Promise.all(returnString);
-        })
-
-    })
-
-
-
-    controller.hears(['^dp$'], 'direct_message,direct_mention', function (bot, message) {
-
-
-        var returnString = "";
-
-        database.ref('ranking').once('value').then(function (snapshot) {
-
-            // var returnString = "";
-            // var arr = [];
-
-            snapshot.forEach(function (childSnapshot) {
-                var key = childSnapshot.key.substr(9, childSnapshot.key.length - 1);
-                console.log("inside for each");
-
-                returnString = getDisplayName(key, bot, message, childSnapshot);
-
-            })
-
-            console.log("RETURNSTRING display: " + returnString);
-            // console.log("ARR: "+ arr);
-
-            // Promise.all(returnString);
         })
 
     })
