@@ -179,26 +179,27 @@ module.exports = function (controller, writeIntoFirebase, database) {
             var challengerName = "";
             var victimName = "";
 
-            challengerNamePromise.then(function(result){
+            challengerNamePromise.then(function (result) {
                 console.log("CHALLENGER NAME :" + JSON.stringify(result));
                 challengerName = result.items[0].displayName
-            })
-            victimNamePromise.then(function(result){
-                console.log("VICTIM NAME :" + result.items[0].displayName);
-                victimName = result.items[0].displayName
 
-                if (dice1 <= dice2) {
-                    updatePoints(challenger, -1)
-                    updatePoints(victim, 1)
-                    console.log("challenger lost");
-                    bot.reply(message, challengerName + " tried to steal but failed. Justice prevail and point awarded to " + victimName)
-                } else {
-                    console.log("challenger won");
-                    updatePoints(victim, -1)
-                    updatePoints(challenger, 1)
-                    bot.reply(message, challengerName + " robbed a point and got away! Point stolen from " + victimName);
-                }
-    
+                victimNamePromise.then(function (result) {
+                    console.log("VICTIM NAME :" + result.items[0].displayName);
+                    victimName = result.items[0].displayName
+
+                    if (dice1 <= dice2) {
+                        updatePoints(challenger, -1)
+                        updatePoints(victim, 1)
+                        console.log("challenger lost");
+                        bot.reply(message, challengerName + " tried to steal but failed. Justice prevail and point awarded to " + victimName)
+                    } else {
+                        console.log("challenger won");
+                        updatePoints(victim, -1)
+                        updatePoints(challenger, 1)
+                        bot.reply(message, challengerName + " robbed a point and got away! Point stolen from " + victimName);
+                    }
+
+                })
             })
 
         });
