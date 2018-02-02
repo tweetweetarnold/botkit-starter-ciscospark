@@ -65,6 +65,10 @@ controller.hears('help', 'direct_message,direct_mention', function (bot, message
     bot.reply(message, 'Hi, ' + intro_msg);
 });
 
+controller.hears('^-lang-help$', 'direct_message,direct_mention', function (bot, message) {
+    bot.reply(message, lang_help);
+});
+
 
 controller.hears('-console', 'direct_message,direct_mention', function (bot, message) {
     console.log(message);
@@ -96,7 +100,7 @@ controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot
 //
 
 
-var intro_msg = 'I am **Bambot**! I will be your assistant to translate foreign languages quickly like BAM! I know a few languages and will do my best to help you! I am still learning new features to serve you better, but at the moment, these are the few things I can do! \n- Greet you back! Try `hello`\n- BAM back! Try `bam`\n- Show languages I know. Try `-show`\n- Set translation languages. Try translating English to French! `-lang en-fr`\n- Translate. Try `-t i love chicken`\n\nIn a space, please tag me at the start so that I know you are talking to me! Whee!';
+var intro_msg = 'I am **BamBot**! I am your new and energetic companion that loves to have fun! I speak multiple languages and can do many other things. I can do the following: \n- Greet you back! Try `hello`\n- BAM back! Try `bam`\n- Show languages I know. Try `-show`\n- Set translation languages. Try translating English to French! `-lang en-fr`\n- Translate. Try `-t i love chicken`\n\nIn a space, please tag me at the start so that I know you are talking to me! Whee!';
 
 var lang_list = {
     "af": "Afrikaans",
