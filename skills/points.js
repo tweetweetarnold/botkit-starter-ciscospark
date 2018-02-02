@@ -145,11 +145,14 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     controller.hears(['-challenge *'], 'direct_message,direct_mention', function (bot, message) {
         var taggedPeople = message.data.mentionedPeople;
-        console.log("MESSAGE: " + JSON.stringify(message));
+        console.log("tagged people: " + taggedPeople);
+        // console.log("MESSAGE: " + JSON.stringify(message));
 
         var challenger = message.data.personId;
         var victim = "";
         console.log("message;" + JSON.stringify(message.data.personId))
+
+        console.log("TAGGEDPEOPLE: " + taggedPeople);
 
         if (taggedPeople.length != 2) {
             bot.reply(message, "Invalid! Type @Bambot -challenge <person you challenging>");
@@ -164,9 +167,43 @@ module.exports = function (controller, writeIntoFirebase, database) {
             // do calculation here
             victim = personId;
 
-            //updatePoints(personId, increment)
+            var dice1 = Math.floor(Math.random() * 6) + 1
+            var dice2 = Math.floor(Math.random() * 6) + 1
+
+            console.log(dice1);
+            console.log(dice2);
+
+            var challengerNamePromise = getDisplayName(challenger)
+            var victimNamePromise = getDisplayName(victim)
+
+            var challengerName = "";
+            var victimName = "";
+
+            challengerNamePromise.then(function(result){
+                console.log("CHALLENGER NAME :" + JSON.stringify(result));
+                challengerName = result.items[0].displayName
+            })
+            victimNamePromise.then(function(result){
+                console.log("VICTIM NAME :" + result.items[0].displayName);
+                victimName = result.items[0].displayName
+
+                if (dice1 <= dice2) {
+                    updatePoints(challenger, -1)
+                    updatePoints(victim, 1)
+                    console.log("challenger lost");
+                    bot.reply(message, challengerName + " tried to steal but failed. Justice prevail and point awarded to " + victimName)
+                } else {
+                    console.log("challenger won");
+                    updatePoints(victim, -1)
+                    updatePoints(challenger, 1)
+                    bot.reply(message, challengerName + " robbed a point and got away! Point stolen from " + victimName);
+                }
+    
+            })
 
         });
+
+
 
     })
 
