@@ -61,15 +61,15 @@ require("fs").readdirSync(normalizedPath).forEach(function (file) {
 //
 // ************************ General Methods begin here ************************
 //
-controller.hears('help', 'direct_message,direct_mention', function (bot, message) {
+controller.hears('^help$', 'direct_message,direct_mention', function (bot, message) {
     bot.reply(message, 'Hi, ' + intro_msg);
 });
 
-controller.hears('^-lang-help$', 'direct_message,direct_mention', function (bot, message) {
+controller.hears('^langhelp$', 'direct_message,direct_mention', function (bot, message) {
     bot.reply(message, lang_help);
 });
 
-controller.hears('^-game-help$', 'direct_message,direct_mention', function (bot, message) {
+controller.hears('^gamehelp$', 'direct_message,direct_mention', function (bot, message) {
     bot.reply(message, game_help);
 });
 
@@ -104,11 +104,11 @@ controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot
 //
 
 
-var intro_msg = 'I am **BamBot**! I am your new and energetic companion that loves to have fun! I speak multiple languages and can do many other things. I can do the following: \n- Greet you back! Try `hello`\n- BAM back! Try `bam`\n- Do translation! Try `-lang-help` to learn more! \n Play a game! Try `-game-help` to learn more!\n\nIn a space, please tag me at the start so that I know you are talking to me! Whee!';
+var intro_msg = 'I am **BamBot**! I am your new and energetic companion that loves to have fun! I speak multiple languages and can do many other things. I can do the following: \n- Greet you back! Try `hello`\n- BAM back! Try `bam`\n- Do translation! Try `langhelp` to learn more! \n - Play a game! Try `gamehelp` to learn more!\n\nIn a space, please tag me at the start so that I know you are talking to me! Whee!';
 
-var lang_help = 'I can speak and translate multiple languages! \n-Show languages I know. Try `-show`\n- Set translation languages. Try translating English to French! `-lang en-fr`\n- Translate. Try `-t i love chicken`\n- To see a summary of all the translation I have done. Try `-summary`'
+var lang_help = 'I can speak and translate multiple languages! \n- Show languages I know. Try `-show`\n- Set translation languages. Try translating English to French! `-lang en-fr`\n- Translate. Try `-t i love chicken` \n- To see a summary. Try `-summary`'
 
-var game_help = '- Display points: `-dp` \n- Add or minus points: -p @Person (-/+) #reason \n- Challenge someone `-challenge @Person`'
+var game_help = '- Display points: `-dp` \n- Add or minus points: `-p @Person (-/+) #reason` \n- Challenge a player. A player can challenge another player by typing `-challenge @Person`. Both players roll a dice. If the challenger rolls a number larger than the victim, challenger wins and takes a point from the victim. Otherwise, he gives a point to the victim. If both numbers are the same, victim wins.'
 
 var lang_list = {
     "af": "Afrikaans",
