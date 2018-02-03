@@ -69,6 +69,10 @@ controller.hears('^-lang-help$', 'direct_message,direct_mention', function (bot,
     bot.reply(message, lang_help);
 });
 
+controller.hears('^-game-help$', 'direct_message,direct_mention', function (bot, message) {
+    bot.reply(message, game_help);
+});
+
 
 controller.hears('-console', 'direct_message,direct_mention', function (bot, message) {
     console.log(message);
@@ -84,11 +88,11 @@ controller.on('direct_message', function (bot, message) {
 });
 
 controller.on('bot_space_join', function (bot, message) {
-    bot.reply(message, 'Hi, ' + intro_msg);
+    bot.reply(message, 'Hello! I am **BamBot**! To see more info about me, type `help` ');
 });
 
 controller.on('user_space_join', function (bot, message) {
-    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>! ' + intro_msg);
+    bot.reply(message, 'Welcome <@personEmail:' + message.user + '>! I am **BamBot**! To see more info about me, type `help` ');
 });
 
 controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot, message) {
@@ -100,7 +104,11 @@ controller.hears('is (.*) cool?', 'direct_message,direct_mention', function (bot
 //
 
 
-var intro_msg = 'I am **BamBot**! I am your new and energetic companion that loves to have fun! I speak multiple languages and can do many other things. I can do the following: \n- Greet you back! Try `hello`\n- BAM back! Try `bam`\n- Show languages I know. Try `-show`\n- Set translation languages. Try translating English to French! `-lang en-fr`\n- Translate. Try `-t i love chicken`\n\nIn a space, please tag me at the start so that I know you are talking to me! Whee!';
+var intro_msg = 'I am **BamBot**! I am your new and energetic companion that loves to have fun! I speak multiple languages and can do many other things. I can do the following: \n- Greet you back! Try `hello`\n- BAM back! Try `bam`\n- Do translation! Try `-lang-help` to learn more! \n Play a game! Try `-game-help` to learn more!\n\nIn a space, please tag me at the start so that I know you are talking to me! Whee!';
+
+var lang_help = 'I can speak and translate multiple languages! \n-Show languages I know. Try `-show`\n- Set translation languages. Try translating English to French! `-lang en-fr`\n- Translate. Try `-t i love chicken`\n- To see a summary of all the translation I have done. Try `-summary`'
+
+var game_help = '- Display points: `-dp` \n- Add or minus points: -p @Person (-/+) #reason \n- Challenge someone `-challenge @Person`'
 
 var lang_list = {
     "af": "Afrikaans",
