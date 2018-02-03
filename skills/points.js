@@ -5,17 +5,17 @@ module.exports = function (controller, writeIntoFirebase, database) {
     function updatePoints(personId, increment) {
         var personRef = database.ref('ranking').child('personId=' + personId);
 
-        console.log("PERSONREF: " + personRef)
-
         personRef.once('value').then(function (snapshot) {
-            var personPoints = 0
-            if (snapshot.val() != null) {
-                personPoints = snapshot.val().points;
+            var personPoints = snapshot.val().points;
+
+            if (personPoints == undefined) {
+                personPoints = 0;
             }
 
             personRef.update({
                 points: personPoints + increment
             })
+
         })
 
     }
@@ -54,11 +54,13 @@ module.exports = function (controller, writeIntoFirebase, database) {
                         })
 
                     } else if (addOrMinus === "-") {
+
                         updatePoints(personId, -1)
                         personRef.child('reasons').push({
                             add: false,
                             reason: thisReason
                         })
+
                     }
 
                 })
@@ -126,11 +128,11 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     controller.hears(['-challenge *'], 'direct_message,direct_mention', function (bot, message) {
         var taggedPeople = message.data.mentionedPeople;
-        console.log("tagged people: " + taggedPeople);
+        // console.log("tagged people: " + taggedPeople);
         // console.log("MESSAGE: " + JSON.stringify(message));
 
-        var challenger = message.data.personId;
-        var victim = "";
+        var challengerId = message.data.personId;
+        var victimId = "";
         console.log("message;" + JSON.stringify(message.data.personId))
 
         console.log("TAGGEDPEOPLE: " + taggedPeople);
@@ -146,45 +148,49 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 return;
             }
             // do calculation here
-            victim = personId;
+            victimId = personId;
 
-            var dice1 = Math.floor(Math.random() * 6) + 1
-            var dice2 = Math.floor(Math.random() * 6) + 1
+            var challengerDice = Math.floor(Math.random() * 6) + 1
+            var victimDice = Math.floor(Math.random() * 6) + 1
 
-            console.log(dice1);
-            console.log(dice2);
+            console.log("CHALLENGER DICE: " + challengerDice);
+            console.log("VICTIM DICE: " + victimDice);
 
-            var challengerNamePromise = getDisplayName(challenger)
-            var victimNamePromise = getDisplayName(victim)
+            var promiseArr = [getDisplayName(challengerId), getDisplayName(victimId)]
 
-            var challengerName = "";
-            var victimName = "";
+            Promise.all(promiseArr).then(function (result) {
+                var challengerName = result[0].items[0].displayName;
+                var victimName = result[1].items[0].displayName;
 
-            challengerNamePromise.then(function (result) {
-                console.log("CHALLENGER NAME :" + JSON.stringify(result));
-                challengerName = result.items[0].displayName
+                console.log("CHALLENGER: " + challengerName)
+                console.log("VICTIM: " + victimName)
 
-                victimNamePromise.then(function (result) {
-                    console.log("VICTIM NAME :" + result.items[0].displayName);
-                    victimName = result.items[0].displayName
+                bot.reply(message, "Challenger " + challengerName + " rolled a " + challengerDice + " while Victim " + victimName + " rolled a " + victimDice)
 
-                    if (dice1 <= dice2) {
-                        updatePoints(challenger, -1)
-                        updatePoints(victim, 1)
-                        console.log("challenger lost");
-                        bot.reply(message, challengerName + " tried to steal but failed. Justice prevail and point awarded to " + victimName)
-                    } else {
-                        console.log("challenger won");
-                        updatePoints(victim, -1)
-                        updatePoints(challenger, 1)
-                        bot.reply(message, challengerName + " robbed a point and got away! Point stolen from " + victimName);
-                    }
+                if (challengerDice > victimDice) {
 
-                })
+                    console.log("challenger won");
+                    updatePoints(victimId, -1)
+                    updatePoints(challengerId, 1)
+
+                    var returnMsg = "Despicable! " + challengerName + " stole a point from " + victimName
+
+
+                    bot.reply(message, "**Challenger " + challengerName + " won!** " + returnMsg);
+                } else {
+
+                    console.log("challenger lost");
+                    updatePoints(challengerId, -1)
+                    updatePoints(victimId, 1)
+
+                    var returnMsg = challengerName + " tried to steal a point from " + victimName + " but got arrested instead!"
+
+                    bot.reply(message, "**Challenger " + challengerName + " lost!** " + returnMsg);
+                }
+
             })
 
         });
-
 
 
     })
