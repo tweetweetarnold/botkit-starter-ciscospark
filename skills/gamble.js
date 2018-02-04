@@ -99,8 +99,10 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     }
 
+
     function updatePoints(personId, increment) {
         var personRef = database.ref('ranking').child('personId=' + personId);
+        var promise = getDisplayName(personId)
 
         personRef.once('value').then(function (snapshot) {
             var personPoints = snapshot.val().points;
@@ -109,13 +111,44 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 personPoints = 0;
             }
 
-            personRef.update({
-                points: personPoints + increment
+            promise.then(function (result) {
+
+                personRef.update({
+                    points: personPoints + increment,
+                    personEmail: result
+                })
+
             })
 
         })
 
     }
+
+
+
+
+    function getDisplayName(key) {
+
+        return new Promise(function (resolve, reject) {
+
+            request({
+                url: 'https://api.ciscospark.com/v1/people',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'Authorization': 'Bearer ' + process.env.access_token
+                },
+                qs: {
+                    'id': key
+                }
+            }, function (error, response, body) {
+                resolve(JSON.parse(body).items[0].displayName)
+            })
+
+        })
+
+    }
+
+
 
 
 }

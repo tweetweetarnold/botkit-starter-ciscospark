@@ -4,6 +4,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     function updatePoints(personId, increment) {
         var personRef = database.ref('ranking').child('personId=' + personId);
+        var promise = getDisplayName(personId)
 
         personRef.once('value').then(function (snapshot) {
             var personPoints = snapshot.val().points;
@@ -12,8 +13,13 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 personPoints = 0;
             }
 
-            personRef.update({
-                points: personPoints + increment
+            promise.then(function (result) {
+
+                personRef.update({
+                    points: personPoints + increment,
+                    personEmail: result[0]
+                })
+
             })
 
         })
@@ -85,7 +91,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                     'id': key
                 }
             }, function (error, response, body) {
-                resolve(JSON.parse(body))
+                resolve(JSON.parse(body).items[0].displayName)
             })
 
         })
@@ -114,7 +120,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 // building messages
                 var returnString = "";
                 for (var i = pointsArr.length - 1; i >= 0; i--) {
-                    returnString = returnString + "- " + pointsArr[i] + " : " + result[i].items[0].displayName + "\n"
+                    returnString = returnString + "- " + pointsArr[i] + " : " + result[i] + "\n"
                 }
 
                 bot.reply(message, returnString);
@@ -160,8 +166,8 @@ module.exports = function (controller, writeIntoFirebase, database) {
             var promiseArr = [getDisplayName(challengerId), getDisplayName(victimId)]
 
             Promise.all(promiseArr).then(function (result) {
-                var challengerName = result[0].items[0].displayName;
-                var victimName = result[1].items[0].displayName;
+                var challengerName = result[0];
+                var victimName = result[1];
 
                 console.log("CHALLENGER: " + challengerName)
                 console.log("VICTIM: " + victimName)
