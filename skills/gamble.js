@@ -3,85 +3,134 @@ var request = require('request');
 module.exports = function (controller, writeIntoFirebase, database) {
 
 
-
-
-
-    // function getDisplayName(key) {
-
-    //     return new Promise(function (resolve, reject) {
-
-    //         request({
-    //             url: 'https://api.ciscospark.com/v1/people',
-    //             headers: {
-    //                 'Content-Type': 'application/json; charset=utf-8',
-    //                 'Authorization': 'Bearer ' + process.env.access_token
-    //             },
-    //             qs: {
-    //                 'id': key
-    //             }
-    //         }, function (error, response, body) {
-    //             resolve(JSON.parse(body))
-    //         })
-
-    //     })
-
-    // }
-
-
-
-
-
     controller.hears(['^-gamble$'], 'direct_message,direct_mention', function (bot, message) {
 
         var personId = message.data.personId;
         console.log("PERSONID: " + personId)
 
+        var playerChoice = "";
+        var playerAmtToGamble = 0;
+
+        bot.startConversation(message, function (err, convo) {
+
+            convo.say('Warning! Gambling is bad! Do not get addicted!')
+
+            convo.addQuestion('How many points do you want to gamble? Enter a digit between 1 and 9. Go big or go home!', [
+                {
+                    pattern: '^[1-9]$',
+                    callback: function (response, convo) {
+                        // console.log("RESPONSE: " + JSON.stringify(response))
+                        console.log("INPUT: " + response.match[0])
+                        playerAmtToGamble = response.match[0]
+                        convo.gotoThread('gamble_select_thread');
+                    },
+                },
+                {
+                    default: true,
+                    callback: function (response, convo) {
+                        convo.say('I did not understand. Let\'s try again!')
+                        convo.repeat()
+                        convo.next()
+                    },
+                }
+            ], {}, 'default')
 
 
 
-        // var challengerDice = Math.floor(Math.random() * 6) + 1
-        // var victimDice = Math.floor(Math.random() * 6) + 1
+            convo.addQuestion('Choose either Big or Small? Enter *big* or *small*', [
+                {
+                    pattern: '^small$',
+                    callback: function (response, convo) {
+                        // console.log("RESPONSE: " + JSON.stringify(response))
+                        console.log("INPUT: " + response.match[0])
+                        playerChoice = 0
+                        var result = runGamble(playerAmtToGamble, playerChoice, message.data.personId)
 
-        // console.log("CHALLENGER DICE: " + challengerDice);
-        // console.log("VICTIM DICE: " + victimDice);
+                        if (result == 1) {
+                            convo.say("Player win!")
+                        } else {
+                            convo.say("Player lose!")
+                        }
+                        convo.say('Wise choice. Small registered.')
+                        convo.gotoThread('gamble_end');
+                    },
+                },
+                {
+                    pattern: '^big$',
+                    callback: function (response, convo) {
+                        // console.log("RESPONSE: " + JSON.stringify(response))
+                        console.log("INPUT: " + response.match[0])
+                        convo.say('Awesome choice. Big registered.')
+                        playerChoice = 1
+                        var result = runGamble(playerAmtToGamble, playerChoice, message.data.personId)
+                        console.log("**********RESULT: " + result)
 
-        // var promiseArr = [getDisplayName(challengerId), getDisplayName(victimId)]
+                        if (result == 1) {
+                            convo.say("Player win!")
+                        } else {
+                            convo.say("Player lose!")
+                        }
 
-        // Promise.all(promiseArr).then(function (result) {
-        //     var challengerName = result[0].items[0].displayName;
-        //     var victimName = result[1].items[0].displayName;
+                        convo.gotoThread('gamble_end');
+                    },
+                },
+                {
+                    default: true,
+                    callback: function (response, convo) {
+                        convo.say('I did not understand. Let\'s try again!')
+                        convo.repeat()
+                        convo.next()
+                    }
+                }
+            ], {}, 'gamble_select_thread')
 
-        //     console.log("CHALLENGER: " + challengerName)
-        //     console.log("VICTIM: " + victimName)
+            convo.addMessage('Gamble completed', 'gamble_end')
 
-        //     bot.reply(message, "Challenger " + challengerName + " rolled a " + challengerDice + " while Victim " + victimName + " rolled a " + victimDice)
-
-        //     if (challengerDice > victimDice) {
-
-        //         console.log("challenger won");
-        //         updatePoints(victimId, -1)
-        //         updatePoints(challengerId, 1)
-
-        //         var returnMsg = "Despicable! " + challengerName + " stole a point from " + victimName
-
-
-        //         bot.reply(message, "**Challenger " + challengerName + " won!** " + returnMsg);
-        //     } else {
-
-        //         console.log("challenger lost");
-        //         updatePoints(challengerId, -1)
-        //         updatePoints(victimId, 1)
-
-        //         var returnMsg = challengerName + " tried to steal a point from " + victimName + " but got arrested instead!"
-
-        //         bot.reply(message, "**Challenger " + challengerName + " lost!** " + returnMsg);
-        //     }
-
-        // })
-
+        })
 
 
     })
+
+
+
+    function runGamble(amtToGamble, choice, personId) {
+
+        console.log("PERSONID: " + personId)
+        console.log("amtToGamble: " + amtToGamble)
+        console.log("CHOICE: " + choice)
+
+        var bigOrSmall = Math.round(Math.random())
+        console.log("BigOrSmall: " + bigOrSmall);
+
+        if (bigOrSmall === choice) {
+            console.log("PLAYER WINS!")
+            updatePoints(personId, parseInt(amtToGamble))
+            return 1
+        } else {
+            console.log("PLAYER LOSE!")
+            updatePoints(personId, parseInt(amtToGamble * -1))
+            return 0
+        }
+
+    }
+
+    function updatePoints(personId, increment) {
+        var personRef = database.ref('ranking').child('personId=' + personId);
+
+        personRef.once('value').then(function (snapshot) {
+            var personPoints = snapshot.val().points;
+
+            if (personPoints == undefined) {
+                personPoints = 0;
+            }
+
+            personRef.update({
+                points: personPoints + increment
+            })
+
+        })
+
+    }
 
 
 }

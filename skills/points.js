@@ -116,6 +116,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 for (var i = pointsArr.length - 1; i >= 0; i--) {
                     returnString = returnString + "- " + pointsArr[i] + " : " + result[i].items[0].displayName + "\n"
                 }
+
                 bot.reply(message, returnString);
 
             })
