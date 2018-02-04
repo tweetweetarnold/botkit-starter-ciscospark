@@ -41,16 +41,9 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 {
                     pattern: '^small$',
                     callback: function (response, convo) {
-                        // console.log("RESPONSE: " + JSON.stringify(response))
                         console.log("INPUT: " + response.match[0])
-                        playerChoice = 0
-                        var result = runGamble(playerAmtToGamble, playerChoice, message.data.personId)
+                        runGamble(playerAmtToGamble, 0, message.data.personId, bot)
 
-                        if (result == 1) {
-                            convo.say("Player win!")
-                        } else {
-                            convo.say("Player lose!")
-                        }
                         convo.say('Wise choice. Small registered.')
                         convo.gotoThread('gamble_end');
                     },
@@ -58,18 +51,9 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 {
                     pattern: '^big$',
                     callback: function (response, convo) {
-                        // console.log("RESPONSE: " + JSON.stringify(response))
                         console.log("INPUT: " + response.match[0])
                         convo.say('Awesome choice. Big registered.')
-                        playerChoice = 1
-                        var result = runGamble(playerAmtToGamble, playerChoice, message.data.personId)
-                        console.log("**********RESULT: " + result)
-
-                        if (result == 1) {
-                            convo.say("Player win!")
-                        } else {
-                            convo.say("Player lose!")
-                        }
+                        runGamble(playerAmtToGamble, 1, message.data.personId)
 
                         convo.gotoThread('gamble_end');
                     },
@@ -111,6 +95,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
             updatePoints(personId, parseInt(amtToGamble * -1))
             return 0
         }
+
 
     }
 
