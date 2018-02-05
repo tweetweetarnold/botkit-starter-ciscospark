@@ -108,7 +108,7 @@ var intro_msg = 'I am **BamBot**! I am your new and energetic companion that lov
 
 var lang_help = 'I can speak and translate multiple languages! \n- Show languages I know. Try `-show`\n- Set translation languages. Try translating English to French! `-lang en-fr`\n- Translate. Try `-t i love chicken` \n- To see a summary. Try `-summary`'
 
-var game_help = '- Display points: `-dp` \n- Add or minus points: `-p @Person (-/+) #reason` \n- Challenge a player. A player can challenge another player by typing `-challenge @Person`. Both players roll a dice. If the challenger rolls a number larger than the victim, challenger wins and takes a point from the victim. Otherwise, he gives a point to the victim. If both numbers are the same, victim wins.'
+var game_help = '- Display points: `-dp` \n- Add or minus points: `-p @Person (-/+) #reason` \n- Challenge a player. A player can challenge another player by typing `-challenge @Person`. Both players roll a dice. If the challenger rolls a number larger than the victim, challenger wins and takes a point from the victim. Otherwise, he gives a point to the victim. If both numbers are the same, victim wins. \n- Gamble. Try `-gamble`.'
 
 var lang_list = {
     "af": "Afrikaans",
