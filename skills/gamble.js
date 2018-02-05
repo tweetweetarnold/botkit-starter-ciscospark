@@ -42,9 +42,19 @@ module.exports = function (controller, writeIntoFirebase, database) {
                     pattern: '^small$',
                     callback: function (response, convo) {
                         console.log("INPUT: " + response.match[0])
-                        runGamble(playerAmtToGamble, 0, message.data.personId, bot)
+                        var promise = runGamble(playerAmtToGamble, 0, message.data.personId, bot)
 
-                        convo.say('Wise choice. Small registered.')
+                        promise.then(function (result) {
+
+                            if (result == 1) {
+                                convo.addMessage('Player wins!', 'gamble_end')
+                            } else {
+                                convo.addMessage('Player loses!', 'gamble_end')
+                            }
+
+                            convo.gotoThread('gamble_end');
+
+                        })
                         convo.gotoThread('gamble_end');
                     },
                 },
@@ -53,9 +63,20 @@ module.exports = function (controller, writeIntoFirebase, database) {
                     callback: function (response, convo) {
                         console.log("INPUT: " + response.match[0])
                         convo.say('Awesome choice. Big registered.')
-                        runGamble(playerAmtToGamble, 1, message.data.personId)
+                        var promise = runGamble(playerAmtToGamble, 1, message.data.personId)
 
-                        convo.gotoThread('gamble_end');
+                        promise.then(function (result) {
+
+                            if (result == 1) {
+                                convo.addMessage('Player wins!', 'gamble_end')
+                            } else {
+                                convo.addMessage('Player loses!', 'gamble_end')
+                            }
+
+                            convo.gotoThread('gamble_end');
+
+                        })
+
                     },
                 },
                 {
@@ -79,23 +100,26 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     function runGamble(amtToGamble, choice, personId) {
 
-        console.log("PERSONID: " + personId)
-        console.log("amtToGamble: " + amtToGamble)
-        console.log("CHOICE: " + choice)
+        return new Promise(function (resolve, reject) {
 
-        var bigOrSmall = Math.round(Math.random())
-        console.log("BigOrSmall: " + bigOrSmall);
+            console.log("PERSONID: " + personId)
+            console.log("amtToGamble: " + amtToGamble)
+            console.log("CHOICE: " + choice)
 
-        if (bigOrSmall === choice) {
-            console.log("PLAYER WINS!")
-            updatePoints(personId, parseInt(amtToGamble))
-            return 1
-        } else {
-            console.log("PLAYER LOSE!")
-            updatePoints(personId, parseInt(amtToGamble * -1))
-            return 0
-        }
+            var bigOrSmall = Math.round(Math.random())
+            console.log("BigOrSmall: " + bigOrSmall);
 
+            if (bigOrSmall === choice) {
+                console.log("PLAYER WINS!")
+                updatePoints(personId, parseInt(amtToGamble))
+                resolve(1)
+            } else {
+                console.log("PLAYER LOSE!")
+                updatePoints(personId, parseInt(amtToGamble * -1))
+                resolve(0)
+            }
+
+        })
 
     }
 

@@ -7,7 +7,7 @@ require("firebase/auth");
 require("firebase/database");
 
 var controller = Botkit.sparkbot({
-    debug: true,
+    debug: false,
     log: true,
     public_address: process.env.public_address,
     ciscospark_access_token: process.env.access_token,
