@@ -1,6 +1,6 @@
 var request = require('request');
 
-module.exports = function (controller, writeIntoFirebase, database) {
+module.exports = function (controller, database) {
 
     function runGamble(amtToGamble, choice, personId) {
 
@@ -34,10 +34,17 @@ module.exports = function (controller, writeIntoFirebase, database) {
         var playerAmtToGamble = 0;
         var personId = message.data.personId;
         console.log("PERSONID: " + personId)
-        
+
 
         bot.startConversation(message, function (err, convo) {
 
+            convo.setTimeout(10000);
+            convo.onTimeout(function (convo) {
+                convo.say('You kept me waiting too long. I\'m moving on...');
+                convo.next();
+            });
+
+            
             convo.say('Warning! Gambling is bad! Do not get addicted!')
 
             convo.addQuestion('How many points do you want to gamble? Enter a digit between 1 and 9. Go big or go home!', [
@@ -120,58 +127,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
 
     })
-
-
-
-    // function updatePoints(personId, increment) {
-    //     var personRef = database.ref('ranking').child('personId=' + personId);
-    //     var promise = getDisplayName(personId)
-
-    //     personRef.once('value').then(function (snapshot) {
-    //         var personPoints = snapshot.val().points;
-
-    //         if (personPoints == undefined) {
-    //             personPoints = 0;
-    //         }
-
-    //         promise.then(function (result) {
-
-    //             personRef.update({
-    //                 points: personPoints + increment,
-    //                 personEmail: result
-    //             })
-
-    //         })
-
-    //     })
-
-    // }
-
-
-
-
-    // function getDisplayName(key) {
-
-    //     return new Promise(function (resolve, reject) {
-
-    //         request({
-    //             url: 'https://api.ciscospark.com/v1/people',
-    //             headers: {
-    //                 'Content-Type': 'application/json; charset=utf-8',
-    //                 'Authorization': 'Bearer ' + process.env.access_token
-    //             },
-    //             qs: {
-    //                 'id': key
-    //             }
-    //         }, function (error, response, body) {
-    //             resolve(JSON.parse(body).items[0].displayName)
-    //         })
-
-    //     })
-
-    // }
-
-
 
 
 }

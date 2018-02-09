@@ -7,7 +7,7 @@ require("firebase/auth");
 require("firebase/database");
 
 var controller = Botkit.sparkbot({
-    debug: false,
+    debug: true,
     log: true,
     public_address: process.env.public_address,
     ciscospark_access_token: process.env.access_token,
@@ -49,7 +49,7 @@ controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
 // retrieving skills
 var normalizedPath = require("path").join(__dirname, "skills");
 require("fs").readdirSync(normalizedPath).forEach(function (file) {
-    require("./skills/" + file)(controller, writeIntoFirebase, database);
+    require("./skills/" + file)(controller, database);
 });
 
 //
@@ -84,7 +84,7 @@ controller.on('direct_mention', function (bot, message) {
 });
 
 controller.on('direct_message', function (bot, message) {
-    bot.reply(message, '# I did not understand that! I am #Grumpy');
+    bot.reply(message, 'What are you saying??? See `help` to see the list of things I can do!');
 });
 
 controller.on('bot_space_join', function (bot, message) {

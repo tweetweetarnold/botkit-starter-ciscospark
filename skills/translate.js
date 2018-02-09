@@ -2,7 +2,7 @@
 
 const request = require('request');
 
-module.exports = function (controller, writeIntoFirebase, database) {
+module.exports = function (controller, database) {
 
     // var room_lang = {};
     const baseUrl = 'https://translate.yandex.net/api/v1.5/tr.json/';

@@ -1,5 +1,5 @@
 
-module.exports = function (controller, writeIntoFirebase) {
+module.exports = function (controller, database) {
 
     controller.hears(['^hello$', '^hey$', '^hi$', '^aloha$'], 'direct_message,direct_mention', function (bot, message) {
         var message_options = [

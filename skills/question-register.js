@@ -1,6 +1,6 @@
 var request = require('request');
 
-module.exports = function (controller, writeIntoFirebase, database) {
+module.exports = function (controller, database) {
 
     controller.hears(['-regis'], 'direct_message,direct_mention', function (bot, message) {
 

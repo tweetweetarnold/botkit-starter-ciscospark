@@ -1,6 +1,6 @@
 const request = require('request');
 
-module.exports = function (controller, writeIntoFirebase, database) {
+module.exports = function (controller, database) {
 
 
     controller.hears('^-summary$', 'direct_message,direct_mention', function (bot, message) {
