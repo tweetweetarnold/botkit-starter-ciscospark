@@ -5,11 +5,11 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     controller.hears(['^-gamble$'], 'direct_message,direct_mention', function (bot, message) {
 
-        var personId = message.data.personId;
-        console.log("PERSONID: " + personId)
-
         var playerChoice = "";
         var playerAmtToGamble = 0;
+        var personId = message.data.personId;
+        console.log("PERSONID: " + personId)
+        
 
         bot.startConversation(message, function (err, convo) {
 
@@ -34,7 +34,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
                     },
                 }
             ], {}, 'default')
-
 
 
             convo.addQuestion('Choose either Big or Small? Enter *big* or *small*', [
@@ -74,6 +73,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                             }
 
                             convo.gotoThread('gamble_end');
+                            // convo.
 
                         })
 
@@ -111,11 +111,11 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
             if (bigOrSmall === choice) {
                 console.log("PLAYER WINS!")
-                updatePoints(personId, parseInt(amtToGamble))
+                global.updatePoints(personId, parseInt(amtToGamble))
                 resolve(1)
             } else {
                 console.log("PLAYER LOSE!")
-                updatePoints(personId, parseInt(amtToGamble * -1))
+                global.updatePoints(personId, parseInt(amtToGamble * -1))
                 resolve(0)
             }
 
@@ -124,53 +124,53 @@ module.exports = function (controller, writeIntoFirebase, database) {
     }
 
 
-    function updatePoints(personId, increment) {
-        var personRef = database.ref('ranking').child('personId=' + personId);
-        var promise = getDisplayName(personId)
+    // function updatePoints(personId, increment) {
+    //     var personRef = database.ref('ranking').child('personId=' + personId);
+    //     var promise = getDisplayName(personId)
 
-        personRef.once('value').then(function (snapshot) {
-            var personPoints = snapshot.val().points;
+    //     personRef.once('value').then(function (snapshot) {
+    //         var personPoints = snapshot.val().points;
 
-            if (personPoints == undefined) {
-                personPoints = 0;
-            }
+    //         if (personPoints == undefined) {
+    //             personPoints = 0;
+    //         }
 
-            promise.then(function (result) {
+    //         promise.then(function (result) {
 
-                personRef.update({
-                    points: personPoints + increment,
-                    personEmail: result
-                })
+    //             personRef.update({
+    //                 points: personPoints + increment,
+    //                 personEmail: result
+    //             })
 
-            })
+    //         })
 
-        })
+    //     })
 
-    }
-
-
+    // }
 
 
-    function getDisplayName(key) {
 
-        return new Promise(function (resolve, reject) {
 
-            request({
-                url: 'https://api.ciscospark.com/v1/people',
-                headers: {
-                    'Content-Type': 'application/json; charset=utf-8',
-                    'Authorization': 'Bearer ' + process.env.access_token
-                },
-                qs: {
-                    'id': key
-                }
-            }, function (error, response, body) {
-                resolve(JSON.parse(body).items[0].displayName)
-            })
+    // function getDisplayName(key) {
 
-        })
+    //     return new Promise(function (resolve, reject) {
 
-    }
+    //         request({
+    //             url: 'https://api.ciscospark.com/v1/people',
+    //             headers: {
+    //                 'Content-Type': 'application/json; charset=utf-8',
+    //                 'Authorization': 'Bearer ' + process.env.access_token
+    //             },
+    //             qs: {
+    //                 'id': key
+    //             }
+    //         }, function (error, response, body) {
+    //             resolve(JSON.parse(body).items[0].displayName)
+    //         })
+
+    //     })
+
+    // }
 
 
 

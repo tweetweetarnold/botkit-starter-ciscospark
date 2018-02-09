@@ -1,7 +1,7 @@
 
 var moment = require('moment')
 
-module.exports = function (controller, writeIntoFirebase, database) {
+module.exports = function (controller, database) {
 
     controller.hears('^bam$', 'direct_message,direct_mention', function (bot, message) {
         database.ref('timestamp').child('asd').once('value').then(function (snapshot) {
@@ -14,7 +14,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
             console.log("B: " + b)
 
             console.log("b > a? : " + (b > a))
-
         })
 
 
@@ -34,8 +33,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
         database.ref('timestamp').child('asd').set({
             last: message.data.created
         })
-
-        writeIntoFirebase(message);
 
         bot.reply(message, chosen_message)
     });

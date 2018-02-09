@@ -2,9 +2,10 @@ var request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
 
-    function updatePoints(personId, increment) {
+    // Update points of person
+    global.updatePoints = function updatePoints(personId, increment) {
         var personRef = database.ref('ranking').child('personId=' + personId);
-        var promise = getDisplayName(personId)
+        var promise = global.getDisplayName(personId)
 
         personRef.once('value').then(function (snapshot) {
             var personPoints = snapshot.val().points;
@@ -19,11 +20,30 @@ module.exports = function (controller, writeIntoFirebase, database) {
                     points: personPoints + increment,
                     personEmail: result[0]
                 })
-
             })
 
         })
+    }
 
+    // Return person's name given personId
+    global.getDisplayName = function getDisplayName(personId) {
+
+        return new Promise(function (resolve, reject) {
+
+            request({
+                url: 'https://api.ciscospark.com/v1/people',
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8',
+                    'Authorization': 'Bearer ' + process.env.access_token
+                },
+                qs: {
+                    'id': personId
+                }
+            }, function (error, response, body) {
+                resolve(JSON.parse(body).items[0].displayName)
+            })
+
+        })
     }
 
 
@@ -53,7 +73,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 personRef.once('value').then(function (snapshot) {
 
                     if (addOrMinus === "+") {
-                        updatePoints(personId, 1)
+                        global.updatePoints(personId, 1)
                         personRef.child('reasons').push({
                             add: true,
                             reason: thisReason
@@ -61,7 +81,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
                     } else if (addOrMinus === "-") {
 
-                        updatePoints(personId, -1)
+                        global.updatePoints(personId, -1)
                         personRef.child('reasons').push({
                             add: false,
                             reason: thisReason
@@ -77,26 +97,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
     })
 
 
-    function getDisplayName(key) {
-
-        return new Promise(function (resolve, reject) {
-
-            request({
-                url: 'https://api.ciscospark.com/v1/people',
-                headers: {
-                    'Content-Type': 'application/json; charset=utf-8',
-                    'Authorization': 'Bearer ' + process.env.access_token
-                },
-                qs: {
-                    'id': key
-                }
-            }, function (error, response, body) {
-                resolve(JSON.parse(body).items[0].displayName)
-            })
-
-        })
-
-    }
+    
 
 
     controller.hears(['^-dp$'], 'direct_message,direct_mention', function (bot, message) {
@@ -112,7 +113,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
                 pointsArr.push(points)
 
-                var displayNamePromise = getDisplayName(key);
+                var displayNamePromise = global.getDisplayName(key);
                 displayNamePromiseArr.push(displayNamePromise);
             })
 
@@ -163,7 +164,7 @@ module.exports = function (controller, writeIntoFirebase, database) {
             console.log("CHALLENGER DICE: " + challengerDice);
             console.log("VICTIM DICE: " + victimDice);
 
-            var promiseArr = [getDisplayName(challengerId), getDisplayName(victimId)]
+            var promiseArr = [global.getDisplayName(challengerId), global.getDisplayName(victimId)]
 
             Promise.all(promiseArr).then(function (result) {
                 var challengerName = result[0];
@@ -177,8 +178,8 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 if (challengerDice > victimDice) {
 
                     console.log("challenger won");
-                    updatePoints(victimId, -1)
-                    updatePoints(challengerId, 1)
+                    global.updatePoints(victimId, -1)
+                    global.updatePoints(challengerId, 1)
 
                     var returnMsg = "Despicable! " + challengerName + " stole a point from " + victimName
 
@@ -187,8 +188,8 @@ module.exports = function (controller, writeIntoFirebase, database) {
                 } else {
 
                     console.log("challenger lost");
-                    updatePoints(challengerId, -1)
-                    updatePoints(victimId, 1)
+                    global.updatePoints(challengerId, -1)
+                    global.updatePoints(victimId, 1)
 
                     var returnMsg = challengerName + " tried to steal a point from " + victimName + " but got arrested instead!"
 
