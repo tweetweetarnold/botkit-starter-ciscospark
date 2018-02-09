@@ -2,6 +2,31 @@ var request = require('request');
 
 module.exports = function (controller, writeIntoFirebase, database) {
 
+    function runGamble(amtToGamble, choice, personId) {
+
+        return new Promise(function (resolve, reject) {
+
+            console.log("PERSONID: " + personId)
+            console.log("amtToGamble: " + amtToGamble)
+            console.log("CHOICE: " + choice)
+
+            var bigOrSmall = Math.round(Math.random())
+            console.log("BigOrSmall: " + bigOrSmall);
+
+            if (bigOrSmall === choice) {
+                console.log("PLAYER WINS!")
+                global.updatePoints(personId, parseInt(amtToGamble))
+                resolve(1)
+            } else {
+                console.log("PLAYER LOSE!")
+                global.updatePoints(personId, parseInt(amtToGamble * -1))
+                resolve(0)
+            }
+
+        })
+
+    }
+
 
     controller.hears(['^-gamble$'], 'direct_message,direct_mention', function (bot, message) {
 
@@ -96,32 +121,6 @@ module.exports = function (controller, writeIntoFirebase, database) {
 
     })
 
-
-
-    function runGamble(amtToGamble, choice, personId) {
-
-        return new Promise(function (resolve, reject) {
-
-            console.log("PERSONID: " + personId)
-            console.log("amtToGamble: " + amtToGamble)
-            console.log("CHOICE: " + choice)
-
-            var bigOrSmall = Math.round(Math.random())
-            console.log("BigOrSmall: " + bigOrSmall);
-
-            if (bigOrSmall === choice) {
-                console.log("PLAYER WINS!")
-                global.updatePoints(personId, parseInt(amtToGamble))
-                resolve(1)
-            } else {
-                console.log("PLAYER LOSE!")
-                global.updatePoints(personId, parseInt(amtToGamble * -1))
-                resolve(0)
-            }
-
-        })
-
-    }
 
 
     // function updatePoints(personId, increment) {
