@@ -1,4 +1,4 @@
-// import { encode } from 'punycode';
+"use strict";
 
 const request = require('request');
 

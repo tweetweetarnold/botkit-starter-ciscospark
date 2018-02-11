@@ -1,3 +1,4 @@
+"use strict";
 var Botkit = require('botkit');
 var env = require('node-env-file');
 env(__dirname + '/.env');
@@ -37,6 +38,13 @@ var writeIntoFirebase = function (message) {
 var bot = controller.spawn({
 });
 
+// Setting up dialogflow middleware
+var dialogflowMiddleware = require('botkit-middleware-dialogflow')({
+    token: process.env.dialogflow,
+});
+controller.middleware.receive.use(dialogflowMiddleware.receive);
+bot.startRTM();
+
 
 // Setting up web server
 controller.setupWebserver(process.env.PORT || 3000, function (err, webserver) {
@@ -73,7 +81,6 @@ controller.hears('^gamehelp$', 'direct_message,direct_mention', function (bot, m
     bot.reply(message, game_help);
 });
 
-
 controller.hears('-console', 'direct_message,direct_mention', function (bot, message) {
     console.log(message);
     bot.reply(message, "done");
@@ -83,9 +90,11 @@ controller.on('direct_mention', function (bot, message) {
     bot.reply(message, 'You mentioned me and said, "' + message.text + '"');
 });
 
-controller.on('direct_message', function (bot, message) {
+controller.on('direct_message', dialogflowMiddleware.hears, function (bot, message) {
     bot.reply(message, 'What are you saying??? See `help` to see the list of things I can do!');
 });
+
+
 
 controller.on('bot_space_join', function (bot, message) {
     bot.reply(message, 'Hello! I am **BamBot**! To see more info about me, type `help` ');

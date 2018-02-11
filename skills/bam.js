@@ -1,5 +1,5 @@
-
-var moment = require('moment')
+"use strict";
+const moment = require('moment')
 
 module.exports = function (controller, database) {
 

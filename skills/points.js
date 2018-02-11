@@ -1,5 +1,5 @@
 var request = require('request');
-// var myFunction = require('./base_functions.js')
+"use strict";
 
 module.exports = function (controller, database) {
 

@@ -1,4 +1,5 @@
 const request = require('request');
+"use strict";
 
 module.exports = function (controller, database) {
 
