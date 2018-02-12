@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 var Botkit = require('botkit');
 var env = require('node-env-file');
 env(__dirname + '/.env');
