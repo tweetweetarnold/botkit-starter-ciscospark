@@ -89,9 +89,9 @@ controller.on('direct_mention', function (bot, message) {
     bot.reply(message, 'You mentioned me and said, "' + message.text + '"');
 });
 
-controller.on('direct_message', dialogflowMiddleware.hears, function (bot, message) {
-    bot.reply(message, 'What are you saying??? See `help` to see the list of things I can do!');
-});
+// controller.on('direct_message', dialogflowMiddleware.hears, function (bot, message) {
+//     bot.reply(message, 'What are you saying??? See `help` to see the list of things I can do!');
+// });
 
 
 
