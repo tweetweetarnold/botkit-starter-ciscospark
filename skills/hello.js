@@ -1,4 +1,3 @@
-// "use strict";
 module.exports = function (controller, database) {
 
     controller.hears(['^hello$', '^hey$', '^hi$', '^aloha$'], 'direct_message,direct_mention', function (bot, message) {

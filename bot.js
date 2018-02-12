@@ -1,4 +1,3 @@
-// "use strict";
 var Botkit = require('botkit');
 var env = require('node-env-file');
 env(__dirname + '/.env');
@@ -39,11 +38,11 @@ var bot = controller.spawn({
 });
 
 // Setting up dialogflow middleware
-var dialogflowMiddleware = require('botkit-middleware-dialogflow')({
-    token: process.env.dialogflow,
-});
-controller.middleware.receive.use(dialogflowMiddleware.receive);
-bot.startRTM();
+// var dialogflowMiddleware = require('botkit-middleware-dialogflow')({
+//     token: process.env.dialogflow,
+// });
+// controller.middleware.receive.use(dialogflowMiddleware.receive);
+// bot.startRTM();
 
 
 // Setting up web server
