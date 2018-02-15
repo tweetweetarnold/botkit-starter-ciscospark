@@ -57,11 +57,9 @@ module.exports = function (controller, database) {
 
 
     controller.hears(['^-dp$'], 'direct_message,direct_mention', function (bot, message) {
-        console.log("In function -dp")
+        console.log("LOG: In function -dp")
 
         database.ref('ranking').orderByChild('points').once('value').then(function (snapshot) {
-
-            console.log("SNAPSHOT: " + JSON.stringify(snapshot))
 
             var displayNamePromiseArr = [];
             var pointsArr = [];
