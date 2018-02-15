@@ -2,9 +2,7 @@ var Botkit = require('botkit');
 var env = require('node-env-file');
 env(__dirname + '/.env');
 
-var firebase = require("firebase/app");
-require("firebase/auth");
-require("firebase/database");
+var firebase = require("firebase");
 
 var controller = Botkit.sparkbot({
     debug: true,
@@ -15,24 +13,54 @@ var controller = Botkit.sparkbot({
 });
 
 var firebaseConfig = {
-    // apiKey: "apiKey",
-    // authDomain: "projectId.firebaseapp.com",
-    databaseURL: "https://bambot-36f9f.firebaseio.com/",
-    // storageBucket: "bucket.appspot.com"
+    apiKey: "AIzaSyDC9z-aiV47fH4QXtCrYlU7mKBx3Ko1sdg",
+    authDomain: "bambot-36f9f.firebaseapp.com",
+    databaseURL: "https://bambot-36f9f.firebaseio.com",
+    projectId: "bambot-36f9f",
+    storageBucket: "bambot-36f9f.appspot.com",
+    messagingSenderId: "947045026687"
 };
 firebase.initializeApp(firebaseConfig);
 console.log("FIREBASE: Initialized!");
 var database = firebase.database();
 
+console.log("FIREBASE: Logging in user")
+firebase.auth().signInWithEmailAndPassword(process.env.firebaseUser, process.env.firebasePass).catch(function (error) {
+    console.log("FIREBASE: Authentication error.")
+    // Handle Errors here.
+    var errorCode = error.code;
+    var errorMessage = error.message;
+    process.exit(1);
+});
 
-var writeIntoFirebase = function (message) {
-    database.ref('/history-chat').child('roomId=' + message.data.roomId).push().set({
-        messageId: message.data.id,
-        created: message.data.created,
-        text: message.text,
-        personEmail: message.data.personEmail,
-    });
-};
+firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+        // User is signed in.
+        var displayName = user.displayName;
+        var email = user.email;
+        var emailVerified = user.emailVerified;
+        var photoURL = user.photoURL;
+        var isAnonymous = user.isAnonymous;
+        var uid = user.uid;
+        var providerData = user.providerData;
+        console.log("FIREBASE: User is signed in. Name: " + user.displayName)
+        // ...
+    } else {
+        // User is signed out.
+        // ...
+    }
+});
+
+
+
+// var writeIntoFirebase = function (message) {
+//     database.ref('/history-chat').child('roomId=' + message.data.roomId).push().set({
+//         messageId: message.data.id,
+//         created: message.data.created,
+//         text: message.text,
+//         personEmail: message.data.personEmail,
+//     });
+// };
 
 var bot = controller.spawn({
 });
@@ -58,6 +86,8 @@ var normalizedPath = require("path").join(__dirname, "skills");
 require("fs").readdirSync(normalizedPath).forEach(function (file) {
     require("./skills/" + file)(controller, database);
 });
+
+
 
 //
 // ************************ Setup config ends here ************************

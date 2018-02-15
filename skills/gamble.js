@@ -51,7 +51,6 @@ module.exports = function (controller, database) {
                 {
                     pattern: '^[1-9]$',
                     callback: function (response, convo) {
-                        // console.log("RESPONSE: " + JSON.stringify(response))
                         console.log("INPUT: " + response.match[0])
                         playerAmtToGamble = response.match[0]
                         convo.gotoThread('gamble_select_thread');
@@ -105,8 +104,6 @@ module.exports = function (controller, database) {
                             }
 
                             convo.gotoThread('gamble_end');
-                            // convo.
-
                         })
 
                     },

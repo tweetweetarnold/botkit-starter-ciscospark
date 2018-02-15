@@ -30,18 +30,18 @@ module.exports = function (controller, database) {
 
                     if (addOrMinus === "+") {
                         global.updatePoints(personId, 1)
-                        personRef.child('reasons').push({
-                            add: true,
-                            reason: thisReason
-                        })
+                        // personRef.child('reasons').push({
+                        //     add: true,
+                        //     reason: thisReason
+                        // })
 
                     } else if (addOrMinus === "-") {
 
                         global.updatePoints(personId, -1)
-                        personRef.child('reasons').push({
-                            add: false,
-                            reason: thisReason
-                        })
+                        // personRef.child('reasons').push({
+                        //     add: false,
+                        //     reason: thisReason
+                        // })
 
                     }
 
@@ -57,8 +57,11 @@ module.exports = function (controller, database) {
 
 
     controller.hears(['^-dp$'], 'direct_message,direct_mention', function (bot, message) {
+        console.log("In function -dp")
 
         database.ref('ranking').orderByChild('points').once('value').then(function (snapshot) {
+
+            console.log("SNAPSHOT: " + JSON.stringify(snapshot))
 
             var displayNamePromiseArr = [];
             var pointsArr = [];
