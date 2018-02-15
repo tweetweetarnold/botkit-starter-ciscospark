@@ -1,4 +1,6 @@
-var request = require('request');
+const request = require('request');
+const m = require('../req/myFunctions.js')
+
 
 module.exports = function (controller, database) {
 
@@ -15,11 +17,11 @@ module.exports = function (controller, database) {
 
             if (bigOrSmall === choice) {
                 console.log("PLAYER WINS!")
-                global.updatePoints(personId, parseInt(amtToGamble))
+                m.updatePoints(personId, parseInt(amtToGamble), database)
                 resolve(1)
             } else {
                 console.log("PLAYER LOSE!")
-                global.updatePoints(personId, parseInt(amtToGamble * -1))
+                m.updatePoints(personId, parseInt(amtToGamble * -1), database)
                 resolve(0)
             }
 
@@ -33,21 +35,19 @@ module.exports = function (controller, database) {
         var playerChoice = "";
         var playerAmtToGamble = 0;
         var personId = message.data.personId;
-        console.log("PERSONID: " + personId)
-
 
         bot.startConversation(message, function (err, convo) {
-
+            
+            // Set convo timeout to 10 seconds
             convo.setTimeout(10000);
             convo.onTimeout(function (convo) {
                 convo.say('You kept me waiting too long. I\'m moving on...');
                 convo.next();
             });
 
-            
-            convo.say('Warning! Gambling is bad! Do not get addicted!')
+            // convo.say("**Warning! You cannot gamble if you have no points! Go do something better with your life.")
 
-            convo.addQuestion('How many points do you want to gamble? Enter a digit between 1 and 9. Go big or go home!', [
+            convo.addQuestion('**Disclaimer! Gambling is bad! Do it at your own risk!** How many points do you want to gamble? Enter a digit between 1 and 9.', [
                 {
                     pattern: '^[1-9]$',
                     callback: function (response, convo) {
@@ -67,7 +67,7 @@ module.exports = function (controller, database) {
             ], {}, 'default')
 
 
-            convo.addQuestion('Choose either Big or Small? Enter *big* or *small*', [
+            convo.addQuestion('Choose either Big or Small? Enter **big** or **small**', [
                 {
                     pattern: '^small$',
                     callback: function (response, convo) {

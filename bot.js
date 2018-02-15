@@ -26,10 +26,10 @@ var database = firebase.database();
 
 console.log("FIREBASE: Logging in user")
 firebase.auth().signInWithEmailAndPassword(process.env.firebaseUser, process.env.firebasePass).catch(function (error) {
-    console.log("FIREBASE: Authentication error.")
     // Handle Errors here.
     var errorCode = error.code;
     var errorMessage = error.message;
+    console.log("FIREBASE: Authentication error. Code: " + errorCode + " Message: " + errorMessage)
     process.exit(1);
 });
 
@@ -44,23 +44,11 @@ firebase.auth().onAuthStateChanged(function (user) {
         var uid = user.uid;
         var providerData = user.providerData;
         console.log("FIREBASE: User is signed in. Name: " + user.displayName)
-        // ...
     } else {
         // User is signed out.
-        // ...
     }
 });
 
-
-
-// var writeIntoFirebase = function (message) {
-//     database.ref('/history-chat').child('roomId=' + message.data.roomId).push().set({
-//         messageId: message.data.id,
-//         created: message.data.created,
-//         text: message.text,
-//         personEmail: message.data.personEmail,
-//     });
-// };
 
 var bot = controller.spawn({
 });

@@ -1,4 +1,5 @@
-var request = require('request');
+const request = require('request');
+var m = require('../req/myFunctions.js')
 
 module.exports = function (controller, database) {
 
@@ -8,13 +9,11 @@ module.exports = function (controller, database) {
         var addOrMinus = message.text.charAt(message.text.length - 1);
         var arr = message.text.toString().split(" ");
 
-        console.log("arr: " + arr[2]);
         addOrMinus = arr[2];
         var startIndex = message.text.indexOf("#") + 1;
-        console.log("STARTINDEX: " + startIndex);
 
         if (startIndex == 0) {
-            bot.reply(message, "Did not find reasoning. Terminating...");
+            bot.reply(message, "You did not add a reason!");
             return;
         }
         var thisReason = message.text.substr(startIndex, message.text.length - 1);
@@ -29,31 +28,18 @@ module.exports = function (controller, database) {
                 personRef.once('value').then(function (snapshot) {
 
                     if (addOrMinus === "+") {
-                        global.updatePoints(personId, 1)
-                        // personRef.child('reasons').push({
-                        //     add: true,
-                        //     reason: thisReason
-                        // })
-
+                        m.updatePoints(personId, 1, database)
                     } else if (addOrMinus === "-") {
-
-                        global.updatePoints(personId, -1)
-                        // personRef.child('reasons').push({
-                        //     add: false,
-                        //     reason: thisReason
-                        // })
-
+                        m.updatePoints(personId, -1, database)
                     }
 
                 })
             }
 
         });
+        // bot.reply(message, "Understood! Points added!")
 
     })
-
-
-    
 
 
     controller.hears(['^-dp$'], 'direct_message,direct_mention', function (bot, message) {
@@ -70,7 +56,7 @@ module.exports = function (controller, database) {
 
                 pointsArr.push(points)
 
-                var displayNamePromise = global.getDisplayName(key);
+                var displayNamePromise = m.getDisplayName(key);
                 displayNamePromiseArr.push(displayNamePromise);
             })
 
@@ -121,7 +107,7 @@ module.exports = function (controller, database) {
             console.log("CHALLENGER DICE: " + challengerDice);
             console.log("VICTIM DICE: " + victimDice);
 
-            var promiseArr = [global.getDisplayName(challengerId), global.getDisplayName(victimId)]
+            var promiseArr = [m.getDisplayName(challengerId), m.getDisplayName(victimId)]
 
             Promise.all(promiseArr).then(function (result) {
                 var challengerName = result[0];
@@ -135,8 +121,8 @@ module.exports = function (controller, database) {
                 if (challengerDice > victimDice) {
 
                     console.log("challenger won");
-                    global.updatePoints(victimId, -1)
-                    global.updatePoints(challengerId, 1)
+                    m.updatePoints(victimId, -1, database)
+                    m.updatePoints(challengerId, 1, database)
 
                     var returnMsg = "Despicable! " + challengerName + " stole a point from " + victimName
 
@@ -145,8 +131,8 @@ module.exports = function (controller, database) {
                 } else {
 
                     console.log("challenger lost");
-                    global.updatePoints(challengerId, -1)
-                    global.updatePoints(victimId, 1)
+                    m.updatePoints(challengerId, -1, database)
+                    m.updatePoints(victimId, 1, database)
 
                     var returnMsg = challengerName + " tried to steal a point from " + victimName + " but got arrested instead!"
 
